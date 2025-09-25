@@ -5,8 +5,8 @@ const corsOptions = {
     // Allow requests from WordPress site
     const allowedOrigins = [
       'http://localhost:8080', // For local development
-      'http://localhost:3000', // For local development
-      'https://your-wordpress-site.com', // Replace with your WordPress site
+      'http://localhost:4000', // For local development
+      'https://bonaventurecclub.com', // Replace with your WordPress site
       // Add your WordPress site URL here
     ];
     
