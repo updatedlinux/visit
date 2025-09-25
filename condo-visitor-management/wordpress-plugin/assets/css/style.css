@@ -1,0 +1,275 @@
+/* Estilos del Plugin de Gestión de Visitantes */
+.condo-visitor-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.condo-visitor-form {
+  background: #fff;
+  border: 1px solid #e1e1e1;
+  border-radius: 5px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.condo-visitor-form h2 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 2px solid #f0f0f1;
+  padding-bottom: 10px;
+}
+
+.condo-visitor-form-group {
+  margin-bottom: 20px;
+}
+
+.condo-visitor-form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+}
+
+.condo-visitor-form-group input,
+.condo-visitor-form-group select,
+.condo-visitor-form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.condo-visitor-form-group input:focus,
+.condo-visitor-form-group select:focus,
+.condo-visitor-form-group textarea:focus {
+  border-color: #0073aa;
+  outline: none;
+  box-shadow: 0 0 0 1px #0073aa;
+}
+
+.condo-visitor-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+}
+
+.condo-visitor-form-col {
+  flex: 1;
+  padding: 0 10px;
+  min-width: 250px;
+}
+
+.condo-visitor-radio-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.condo-visitor-radio-option {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.condo-visitor-radio-option input {
+  width: auto;
+}
+
+.condo-visitor-btn {
+  background: #0073aa;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.condo-visitor-btn:hover {
+  background: #005a87;
+}
+
+.condo-visitor-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.condo-visitor-toggle {
+  background: #f0f0f1;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.condo-visitor-toggle.active {
+  background: #0073aa;
+  color: #fff;
+}
+
+.condo-visitor-section {
+  margin-bottom: 30px;
+}
+
+.condo-visitor-section h3 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #f0f0f1;
+  padding-bottom: 10px;
+}
+
+.condo-visitor-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+.condo-visitor-table th,
+.condo-visitor-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.condo-visitor-table th {
+  background: #f0f0f1;
+  font-weight: 600;
+}
+
+.condo-visitor-table tr:hover {
+  background: #f9f9f9;
+}
+
+.condo-visitor-alert {
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.condo-visitor-alert-success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.condo-visitor-alert-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.condo-visitor-validation-result {
+  background: #fff;
+  border: 1px solid #e1e1e1;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.condo-visitor-validation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.condo-visitor-validation-title {
+  margin: 0;
+  color: #333;
+}
+
+.condo-visitor-validation-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.condo-visitor-info-item {
+  margin-bottom: 10px;
+}
+
+.condo-visitor-info-label {
+  font-weight: 600;
+  color: #555;
+}
+
+.condo-visitor-info-value {
+  color: #333;
+}
+
+.condo-visitor-search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.condo-visitor-search-container input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.condo-visitor-search-container button {
+  background: #0073aa;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .condo-visitor-container {
+    padding: 10px;
+  }
+  
+  .condo-visitor-form {
+    padding: 15px;
+  }
+  
+  .condo-visitor-form-row {
+    flex-direction: column;
+    margin: 0;
+  }
+  
+  .condo-visitor-form-col {
+    padding: 0;
+    min-width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  .condo-visitor-radio-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .condo-visitor-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .condo-visitor-search-container {
+    flex-direction: column;
+  }
+  
+  .condo-visitor-validation-info {
+    grid-template-columns: 1fr;
+  }
+}
