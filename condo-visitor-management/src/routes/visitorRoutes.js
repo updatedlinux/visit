@@ -1,3 +1,7 @@
+const express = require('express');
+const router = express.Router();
+const visitorController = require('../controllers/visitorController');
+
 /**
  * @swagger
  * /visit/new:
