@@ -177,7 +177,7 @@ router.put('/frequent/:id/activate', visitorController.activateFrequentVisitorCo
  *       500:
  *         description: Error interno del servidor
  */
-router.put('/frequent/:id/deactivate', visitorController.deactivateFrequentVisitor);
+router.put('/frequent/:id/deactivate', visitorController.deactivateFrequentVisitorController);
 
 /**
  * @swagger
