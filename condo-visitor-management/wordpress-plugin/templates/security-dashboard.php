@@ -75,26 +75,88 @@
 </div>
 
 <script>
-// En una implementación real, obtendrías datos de la API
-// Esto es solo un marcador de posición para mostrar la estructura
-
-// Establecer fecha por defecto a hoy
-document.getElementById('history-date-filter').valueAsDate = new Date();
-
-// Ejemplo de cómo podrías obtener visitantes de hoy
-/*
 jQuery(document).ready(function($) {
+  // Función para cargar visitantes de hoy
+  function loadTodaysVisitors() {
     $.ajax({
-        url: condo_visitor_ajax.api_url + '/today',
-        method: 'GET',
-        success: function(response) {
-            // Llenar tabla de visitantes de hoy
-            console.log(response);
-        },
-        error: function(xhr) {
-            console.error('Error al obtener visitantes de hoy');
+      url: condo_visitor_ajax.api_url + '/today',
+      method: 'GET',
+      success: function(response) {
+        var tbody = $('#todays-visitors tbody');
+        tbody.empty();
+        if (response.visitors && response.visitors.length > 0) {
+          response.visitors.forEach(function(visitor) {
+            var row = '<tr>' +
+              '<td>' + visitor.first_name + ' ' + visitor.last_name + '</td>' +
+              '<td>' + visitor.id_card + '</td>' +
+              '<td>' + visitor.owner_name + '</td>' +
+              '<td>' + visitor.visit_type + '</td>' +
+              '<td><button class="condo-visitor-btn">Acción</button></td>' +
+              '</tr>';
+            tbody.append(row);
+          });
+        } else {
+          tbody.append('<tr><td colspan="5" style="text-align:center;">No hay visitantes de hoy.</td></tr>');
         }
+      },
+      error: function() {
+        console.error('Error al obtener visitantes de hoy');
+      }
     });
+  }
+
+  // Función para cargar historial de visitas
+  function loadVisitHistory(date) {
+    $.ajax({
+      url: condo_visitor_ajax.api_url + '/history?date=' + encodeURIComponent(date),
+      method: 'GET',
+      success: function(response) {
+        var tbody = $('#visit-history tbody');
+        tbody.empty();
+        if (response.history && response.history.length > 0) {
+          response.history.forEach(function(visit) {
+            var row = '<tr>' +
+              '<td>' + visit.first_name + ' ' + visit.last_name + '</td>' +
+              '<td>' + visit.id_card + '</td>' +
+              '<td>' + visit.owner_name + '</td>' +
+              '<td>' + visit.visit_type + '</td>' +
+              '<td>' + visit.visit_date + '</td>' +
+              '<td>' + visit.arrival_datetime + '</td>' +
+              '</tr>';
+            tbody.append(row);
+          });
+        } else {
+          tbody.append('<tr><td colspan="6" style="text-align:center;">No hay historial de visitas para esta fecha.</td></tr>');
+        }
+      },
+      error: function() {
+        console.error('Error al obtener historial de visitas');
+      }
+    });
+  }
+
+  // Establecer fecha por defecto a hoy
+  $('#history-date-filter').val(new Date().toISOString().split('T')[0]);
+
+  // Cargar visitantes de hoy al cargar la página
+  loadTodaysVisitors();
+
+  // Cargar historial de visitas al cargar la página
+  loadVisitHistory($('#history-date-filter').val());
+
+  // Refrescar visitantes de hoy cada 5 segundos
+  var todaysInterval = setInterval(loadTodaysVisitors, 5000);
+
+  // Filtrar historial de visitas por fecha
+  $('#filter-history-btn').click(function(e) {
+    e.preventDefault();
+    var selectedDate = $('#history-date-filter').val();
+    loadVisitHistory(selectedDate);
+  });
+
+  // Limpiar el interval cuando la página se descarga
+  $(window).on('unload', function() {
+    clearInterval(todaysInterval);
+  });
 });
-*/
 </script>
