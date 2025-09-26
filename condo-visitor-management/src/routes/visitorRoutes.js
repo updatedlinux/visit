@@ -11,7 +11,7 @@ const visitorController = require('../controllers/visitorController');
 
 /**
  * @swagger
- * /visit/new:
+ * /new:
  *   post:
  *     tags: [Visitantes]
  *     summary: Crear o actualizar un visitante único
