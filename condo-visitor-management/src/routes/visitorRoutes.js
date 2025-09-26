@@ -95,7 +95,7 @@ router.post('/new/frequent', visitorController.createFrequentVisitorController);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/new/frequent', visitorController.createFrequentVisitor);
+router.post('/new/frequent', visitorController.createFrequentVisitorController);
 
 /**
  * @swagger
