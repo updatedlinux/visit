@@ -125,14 +125,6 @@ module.exports = {
   logVisitorArrival,
   getTodaysVisitors
 };
-
-    return rows[0];
-  } catch (error) {
-    throw error;
-  }
-}
-
-// Obtener historial de visitantes para un usuario de WordPress
 async function getVisitorHistory(wp_user_id) {
   const query = `
     SELECT v.*, u.display_name as owner_name
