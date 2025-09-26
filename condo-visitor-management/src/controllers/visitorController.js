@@ -227,8 +227,8 @@ const logVisitorArrivalController = async (req, res) => {
   }
 };
 
-// Obtener visitantes de hoy
-const getTodaysVisitorsController = async (req, res) => {
+ // Obtener visitantes de hoy
+async function getTodaysVisitorsController(req, res) {
   try {
     const visitors = await getTodaysVisitors();
     res.status(200).json({ visitors: visitors });
@@ -236,15 +236,25 @@ const getTodaysVisitorsController = async (req, res) => {
     console.error('Error al obtener visitantes de hoy:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
-};
+}
+
+// Obtener historial de visitas filtrado por fecha
+async function getVisitHistoryByDateController(req, res) {
+  const date = req.query.date;
+  if (!date) {
+    return res.status(400).json({ error: 'Falta el parámetro date' });
+  }
+  try {
+    const history = await getVisitHistoryByDate(date);
+    res.status(200).json({ history: history });
+  } catch (error) {
+    console.error('Error al obtener historial de visitas:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+}
 
 module.exports = {
-  createUniqueVisitor: createUniqueVisitorController,
-  createFrequentVisitor: createFrequentVisitorController,
-  getVisitorHistory: getVisitorHistoryController,
-  activateFrequentVisitor: activateFrequentVisitorController,
-  deactivateFrequentVisitor: deactivateFrequentVisitorController,
-  validateVisitor: validateVisitorController,
-  logVisitorArrival: logVisitorArrivalController,
-  getTodaysVisitors: getTodaysVisitorsController
+  getTodaysVisitorsController,
+  getVisitHistoryByDateController,
+  // otros controladores existentes
 };
