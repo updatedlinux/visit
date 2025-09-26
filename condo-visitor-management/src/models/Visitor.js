@@ -168,14 +168,19 @@ async function validateVisitor(id_card) {
 // Registrar llegada de visitante
 function logVisitorArrival(visitor_id) {
   const query = `
-    INSERT INTO condo360_visit_logs (visitor_id, arrival_time)
+    INSERT INTO condo360_visit_logs (visitor_id, arrival_datetime)
     VALUES (?, NOW())
   `;
   return db.execute(query, [visitor_id]);
 }
 
+// Función auxiliar para formatear fecha a YYYY-MM-DD
+function formatDate(dateString) {
+  return dateString ? dateString.split('T')[0] : null;
+}
+
 // Obtener visitantes de hoy
-async function getTodaysVisitors() {
+function getTodaysVisitors() {
   const today = new Date().toISOString().split('T')[0];
   const query = `
     SELECT v.*, u.display_name as owner_name
