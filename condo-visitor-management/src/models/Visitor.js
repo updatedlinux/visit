@@ -1,7 +1,7 @@
 const db = require('../config/database');
 
 // Crear o actualizar un visitante único
-module.exports.createOrUpdateUniqueVisitor = async function createOrUpdateUniqueVisitor(visitorData) {
+async function createOrUpdateUniqueVisitor(visitorData) {
   const { wp_user_id, first_name, last_name, id_card, visit_date } = visitorData;
 
   try {
