@@ -10,14 +10,14 @@ const PORT = process.env.PORT || 3000;
 app.use(cors);
 app.use(express.json());
 
-// Rutas
+// Rutas de la API
 app.use('/visit', visitorRoutes);
 
-// Documentación Swagger
-app.use('/api-docs', swagger.serve, swagger.setup);
+// Documentación Swagger (montada en la raíz)
+app.use('/visit/api-docs', swagger.serve, swagger.setup);
 
 // Endpoint de verificación de salud
-app.get('/health', (req, res) => {
+app.get('/visit/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
@@ -34,7 +34,7 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en el puerto ${PORT}`);
-  console.log(`Documentación API disponible en http://localhost:${PORT}/api-docs`);
+  console.log(`Documentación API disponible en http://localhost:${PORT}/visit/api-docs`);
 });
 
 module.exports = app;

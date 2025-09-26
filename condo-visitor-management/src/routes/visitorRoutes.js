@@ -4,7 +4,7 @@ const visitorController = require('../controllers/visitorController');
 
 /**
  * @swagger
- * /new:
+ * /visit/new:
  *   post:
  *     summary: Crear un nuevo visitante único
  *     description: Registrar un nuevo visitante único para una fecha específica
@@ -28,7 +28,7 @@ router.post('/new', visitorController.createUniqueVisitor);
 
 /**
  * @swagger
- * /new/frequent:
+ * /visit/new/frequent:
  *   post:
  *     summary: Crear un nuevo visitante frecuente
  *     description: Registrar un nuevo visitante frecuente
@@ -52,7 +52,7 @@ router.post('/new/frequent', visitorController.createFrequentVisitor);
 
 /**
  * @swagger
- * /history/{wp_user_id}:
+ * /visit/history/{wp_user_id}:
  *   get:
  *     summary: Obtener historial de visitantes para un usuario
  *     description: Recuperar el historial de visitantes para un usuario específico de WordPress
@@ -79,7 +79,7 @@ router.get('/history/:wp_user_id', visitorController.getVisitorHistory);
 
 /**
  * @swagger
- * /frequent/{id}/activate:
+ * /visit/frequent/{id}/activate:
  *   put:
  *     summary: Activar un visitante frecuente
  *     description: Activar un visitante frecuente por ID
@@ -104,7 +104,7 @@ router.put('/frequent/:id/activate', visitorController.activateFrequentVisitor);
 
 /**
  * @swagger
- * /frequent/{id}/deactivate:
+ * /visit/frequent/{id}/deactivate:
  *   put:
  *     summary: Desactivar un visitante frecuente
  *     description: Desactivar un visitante frecuente por ID
@@ -129,7 +129,7 @@ router.put('/frequent/:id/deactivate', visitorController.deactivateFrequentVisit
 
 /**
  * @swagger
- * /validate/{id_card}:
+ * /visit/validate/{id_card}:
  *   get:
  *     summary: Validar un visitante por cédula
  *     description: Verificar si un visitante con la cédula dada es válido para hoy
@@ -158,7 +158,7 @@ router.get('/validate/:id_card', visitorController.validateVisitor);
 
 /**
  * @swagger
- * /log/{visitor_id}:
+ * /visit/log/{visitor_id}:
  *   post:
  *     summary: Registrar llegada de visitante
  *     description: Registrar la llegada de un visitante
@@ -181,7 +181,7 @@ router.post('/log/:visitor_id', visitorController.logVisitorArrival);
 
 /**
  * @swagger
- * /today:
+ * /visit/today:
  *   get:
  *     summary: Obtener visitantes de hoy
  *     description: Recuperar todos los visitantes únicos programados para hoy
