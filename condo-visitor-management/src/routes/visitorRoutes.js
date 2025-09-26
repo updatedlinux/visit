@@ -152,7 +152,7 @@ router.get('/history/:wp_user_id', visitorController.getVisitorHistoryController
  *       500:
  *         description: Error interno del servidor
  */
-router.put('/frequent/:id/activate', visitorController.activateFrequentVisitor);
+router.put('/frequent/:id/activate', visitorController.activateFrequentVisitorController);
 
 /**
  * @swagger
