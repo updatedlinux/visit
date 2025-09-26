@@ -15,14 +15,14 @@ const visitorController = require('../controllers/visitorController');
  *           schema:
  *             $ref: '#/components/schemas/VisitanteUnico'
  *     responses:
- *       201:
- *       description: Visitante único creado exitosamente
- *       400:
- *       description: Faltan campos requeridos
- *       409:
- *       description: Ya existe un visitante único con esta cédula para la fecha especificada
- *       500:
- *       description: Error interno del servidor
+ *       '201':
+ *         description: Visitante único creado exitosamente
+ *       '400':
+ *         description: Faltan campos requeridos
+ *       '409':
+ *         description: Ya existe un visitante único con esta cédula para la fecha especificada
+ *       '500':
+ *         description: Error interno del servidor
  */
 router.post('/new', visitorController.createUniqueVisitor);
 
@@ -39,14 +39,14 @@ router.post('/new', visitorController.createUniqueVisitor);
  *           schema:
  *             $ref: '#/components/schemas/VisitanteFrecuente'
  *     responses:
- *       201:
- *       description: Visitante frecuente creado exitosamente
- *       400:
- *       description: Faltan campos requeridos o descripción inválida
- *       409:
- *       description: Ya existe un visitante frecuente activo con esta cédula
- *       500:
- *       description: Error interno del servidor
+ *       '201':
+ *         description: Visitante frecuente creado exitosamente
+ *       '400':
+ *         description: Faltan campos requeridos o descripción inválida
+ *       '409':
+ *         description: Ya existe un visitante frecuente activo con esta cédula
+ *       '500':
+ *         description: Error interno del servidor
  */
 router.post('/new/frequent', visitorController.createFrequentVisitor);
 
@@ -64,16 +64,16 @@ router.post('/new/frequent', visitorController.createFrequentVisitor);
  *           type: integer
  *         description: ID de usuario de WordPress
  *     responses:
- *       200:
- *       description: Historial de visitantes recuperado exitosamente
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/HistorialVisitantes'
- *       400:
- *       description: Falta wp_user_id
- *       500:
- *       description: Error interno del servidor
+ *       '200':
+ *         description: Historial de visitantes recuperado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HistorialVisitantes'
+ *       '400':
+ *         description: Falta wp_user_id
+ *       '500':
+ *         description: Error interno del servidor
  */
 router.get('/history/:wp_user_id', visitorController.getVisitorHistory);
 
@@ -91,14 +91,14 @@ router.get('/history/:wp_user_id', visitorController.getVisitorHistory);
  *           type: integer
  *         description: ID del visitante
  *     responses:
- *       200:
- *       description: Visitante frecuente activado exitosamente
- *       400:
- *       description: Falta ID del visitante
- *       404:
- *       description: Visitante frecuente no encontrado
- *       500:
- *       description: Error interno del servidor
+ *       '200':
+ *         description: Visitante frecuente activado exitosamente
+ *       '400':
+ *         description: Falta ID del visitante
+ *       '404':
+ *         description: Visitante frecuente no encontrado
+ *       '500':
+ *         description: Error interno del servidor
  */
 router.put('/frequent/:id/activate', visitorController.activateFrequentVisitor);
 
@@ -116,14 +116,14 @@ router.put('/frequent/:id/activate', visitorController.activateFrequentVisitor);
  *           type: integer
  *         description: ID del visitante
  *     responses:
- *       200:
- *       description: Visitante frecuente desactivado exitosamente
- *       400:
- *       description: Falta ID del visitante
- *       404:
- *       description: Visitante frecuente no encontrado
- *       500:
- *       description: Error interno del servidor
+ *       '200':
+ *         description: Visitante frecuente desactivado exitosamente
+ *       '400':
+ *         description: Falta ID del visitante
+ *       '404':
+ *         description: Visitante frecuente no encontrado
+ *       '500':
+ *         description: Error interno del servidor
  */
 router.put('/frequent/:id/deactivate', visitorController.deactivateFrequentVisitor);
 
@@ -141,18 +141,18 @@ router.put('/frequent/:id/deactivate', visitorController.deactivateFrequentVisit
  *           type: string
  *         description: Número de cédula del visitante
  *     responses:
- *       200:
- *       description: Resultado de validación del visitante
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/RespuestaValidarVisitante'
- *       400:
- *       description: Falta número de cédula
- *       404:
- *       description: Visitante no encontrado o no válido para hoy
- *       500:
- *       description: Error interno del servidor
+ *       '200':
+ *         description: Resultado de validación del visitante
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RespuestaValidarVisitante'
+ *       '400':
+ *         description: Falta número de cédula
+ *       '404':
+ *         description: Visitante no encontrado o no válido para hoy
+ *       '500':
+ *         description: Error interno del servidor
  */
 router.get('/validate/:id_card', visitorController.validateVisitor);
 
@@ -170,12 +170,12 @@ router.get('/validate/:id_card', visitorController.validateVisitor);
  *           type: integer
  *         description: ID del visitante
  *     responses:
- *       201:
- *       description: Llegada de visitante registrada exitosamente
- *       400:
- *       description: Falta ID del visitante
- *       500:
- *       description: Error interno del servidor
+ *       '201':
+ *         description: Llegada de visitante registrada exitosamente
+ *       '400':
+ *         description: Falta ID del visitante
+ *       '500':
+ *         description: Error interno del servidor
  */
 router.post('/log/:visitor_id', visitorController.logVisitorArrival);
 
@@ -186,10 +186,10 @@ router.post('/log/:visitor_id', visitorController.logVisitorArrival);
  *     summary: Obtener visitantes de hoy
  *     description: Recuperar todos los visitantes únicos programados para hoy
  *     responses:
- *       200:
- *       description: Visitantes de hoy recuperados exitosamente
- *       500:
- *       description: Error interno del servidor
+ *       '200':
+ *         description: Visitantes de hoy recuperados exitosamente
+ *       '500':
+ *         description: Error interno del servidor
  */
 router.get('/today', visitorController.getTodaysVisitors);
 
