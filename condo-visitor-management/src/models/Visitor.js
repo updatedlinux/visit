@@ -176,7 +176,14 @@ function logVisitorArrival(visitor_id) {
 
 // Función auxiliar para formatear fecha a YYYY-MM-DD
 function formatDate(dateString) {
-  return dateString ? dateString.split('T')[0] : null;
+  if (!dateString) return null;
+  if (typeof dateString === 'string') {
+    return dateString.split('T')[0];
+  } else if (dateString instanceof Date) {
+    return dateString.toISOString().split('T')[0];
+  } else {
+    return null;
+  }
 }
 
 // Obtener visitantes de hoy
