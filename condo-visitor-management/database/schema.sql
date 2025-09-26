@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS condo360_visitors (
   frequent_visit_other_description VARCHAR(255) NULL,
   active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY unique_id_card_date (id_card, visit_date),
-  UNIQUE KEY unique_id_card_frequent (id_card),
+  UNIQUE KEY unique_id_card_date (id_card, visit_date, visit_type),
+  UNIQUE KEY unique_id_card_frequent_active (id_card, visit_type, active),
   FOREIGN KEY (wp_user_id) REFERENCES wp_users(ID) ON DELETE CASCADE
 );
 

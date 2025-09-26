@@ -1,16 +1,16 @@
 const db = require('../config/database');
 
-// Crear un nuevo visitante único
-async function createUniqueVisitor(visitorData) {
+// Crear o actualizar un visitante único
+async function createOrUpdateUniqueVisitor(visitorData) {
   const { wp_user_id, first_name, last_name, id_card, visit_date } = visitorData;
-  
+
   try {
     // Verificar si ya existe un visitante frecuente con esta cédula
     const [frequentVisitor] = await db.execute(
       'SELECT id, active FROM condo360_visitors WHERE id_card = ? AND visit_type = ?',
       [id_card, 'frequent']
     );
-    
+
     if (frequentVisitor.length > 0) {
       if (frequentVisitor[0].active) {
         throw new Error('Ya existe un visitante frecuente activo con esta cédula. No se puede crear un visitante único.');
@@ -18,35 +18,52 @@ async function createUniqueVisitor(visitorData) {
         throw new Error('Ya existe un visitante frecuente inactivo con esta cédula. Active el visitante frecuente existente en lugar de crear uno nuevo.');
       }
     }
-    
+
     // Verificar si ya existe un visitante único con la misma cédula para la misma fecha
     const [existingVisitor] = await db.execute(
       'SELECT id FROM condo360_visitors WHERE id_card = ? AND visit_date = ? AND visit_type = ?',
       [id_card, visit_date, 'unique']
     );
-    
+
     if (existingVisitor.length > 0) {
-      throw new Error('Ya existe un visitante único con esta cédula para la fecha especificada.');
+      // Actualizar el visitante existente
+      await db.execute(
+        `UPDATE condo360_visitors
+         SET wp_user_id = ?, first_name = ?, last_name = ?
+         WHERE id = ?`,
+        [wp_user_id, first_name, last_name, existingVisitor[0].id]
+      );
+
+      // Obtener el visitante actualizado
+      const [rows] = await db.execute(
+        `SELECT v.*, u.display_name as owner_name
+         FROM condo360_visitors v
+         JOIN wp_users u ON v.wp_user_id = u.ID
+         WHERE v.id = ?`,
+        [existingVisitor[0].id]
+      );
+
+      return rows[0];
+    } else {
+      // Insertar un nuevo visitante único
+      const [result] = await db.execute(
+        `INSERT INTO condo360_visitors
+         (wp_user_id, first_name, last_name, id_card, visit_date, visit_type)
+         VALUES (?, ?, ?, ?, ?, 'unique')`,
+        [wp_user_id, first_name, last_name, id_card, visit_date]
+      );
+
+      // Obtener el visitante recién creado
+      const [rows] = await db.execute(
+        `SELECT v.*, u.display_name as owner_name
+         FROM condo360_visitors v
+         JOIN wp_users u ON v.wp_user_id = u.ID
+         WHERE v.id = ?`,
+        [result.insertId]
+      );
+
+      return rows[0];
     }
-    
-    // Insertar el nuevo visitante único
-    const [result] = await db.execute(
-      `INSERT INTO condo360_visitors 
-      (wp_user_id, first_name, last_name, id_card, visit_date, visit_type) 
-      VALUES (?, ?, ?, ?, ?, 'unique')`,
-      [wp_user_id, first_name, last_name, id_card, visit_date]
-    );
-    
-    // Obtener el visitante recién creado con información del propietario
-    const [rows] = await db.execute(
-      `SELECT v.*, u.display_name as owner_name 
-      FROM condo360_visitors v 
-      JOIN wp_users u ON v.wp_user_id = u.ID 
-      WHERE v.id = ?`,
-      [result.insertId]
-    );
-    
-    return rows[0];
   } catch (error) {
     throw error;
   }
@@ -55,14 +72,14 @@ async function createUniqueVisitor(visitorData) {
 // Crear un nuevo visitante frecuente
 async function createFrequentVisitor(visitorData) {
   const { wp_user_id, first_name, last_name, id_card, frequent_visit_description, frequent_visit_other_description } = visitorData;
-  
+
   try {
     // Verificar si ya existe un visitante frecuente con esta cédula
     const [existingVisitor] = await db.execute(
       'SELECT id, active FROM condo360_visitors WHERE id_card = ? AND visit_type = ?',
       [id_card, 'frequent']
     );
-    
+
     if (existingVisitor.length > 0) {
       if (existingVisitor[0].active) {
         throw new Error('Ya existe un visitante frecuente activo con esta cédula.');
@@ -70,34 +87,34 @@ async function createFrequentVisitor(visitorData) {
         throw new Error('Ya existe un visitante frecuente inactivo con esta cédula. Active el visitante frecuente existente en lugar de crear uno nuevo.');
       }
     }
-    
+
     // Verificar si ya existe un visitante único con la misma cédula
     const [uniqueVisitor] = await db.execute(
       'SELECT id FROM condo360_visitors WHERE id_card = ? AND visit_type = ?',
       [id_card, 'unique']
     );
-    
+
     if (uniqueVisitor.length > 0) {
       throw new Error('Ya existe un visitante único con esta cédula. No se puede crear un visitante frecuente.');
     }
-    
+
     // Insertar el nuevo visitante frecuente
     const [result] = await db.execute(
-      `INSERT INTO condo360_visitors 
-      (wp_user_id, first_name, last_name, id_card, visit_type, frequent_visit_description, frequent_visit_other_description, active) 
-      VALUES (?, ?, ?, ?, 'frequent', ?, ?, 1)`,
+      `INSERT INTO condo360_visitors
+       (wp_user_id, first_name, last_name, id_card, visit_type, frequent_visit_description, frequent_visit_other_description, active)
+       VALUES (?, ?, ?, ?, 'frequent', ?, ?, 1)`,
       [wp_user_id, first_name, last_name, id_card, frequent_visit_description, frequent_visit_other_description || null]
     );
-    
+
     // Obtener el visitante recién creado con información del propietario
     const [rows] = await db.execute(
-      `SELECT v.*, u.display_name as owner_name 
-      FROM condo360_visitors v 
-      JOIN wp_users u ON v.wp_user_id = u.ID 
-      WHERE v.id = ?`,
+      `SELECT v.*, u.display_name as owner_name
+       FROM condo360_visitors v
+       JOIN wp_users u ON v.wp_user_id = u.ID
+       WHERE v.id = ?`,
       [result.insertId]
     );
-    
+
     return rows[0];
   } catch (error) {
     throw error;
@@ -120,8 +137,8 @@ async function getVisitorHistory(wp_user_id) {
 // Actualizar estado de visitante frecuente
 async function updateFrequentVisitorStatus(id, active) {
   const query = `
-    UPDATE condo360_visitors 
-    SET active = ? 
+    UPDATE condo360_visitors
+    SET active = ?
     WHERE id = ? AND visit_type = 'frequent'
   `;
   const [result] = await db.execute(query, [active ? 1 : 0, id]);
@@ -169,9 +186,8 @@ async function getTodaysVisitors() {
   return rows;
 }
 
-// Exportar las funciones
 module.exports = {
-  createUniqueVisitor,
+  createUniqueVisitor: createOrUpdateUniqueVisitor,
   createFrequentVisitor,
   getVisitorHistory,
   updateFrequentVisitorStatus,

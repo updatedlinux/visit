@@ -1,5 +1,5 @@
-const { 
-  createUniqueVisitor,
+const {
+  createOrUpdateUniqueVisitor,
   createFrequentVisitor,
   getVisitorHistory,
   updateFrequentVisitorStatus,
@@ -12,18 +12,18 @@ const {
 const createUniqueVisitorController = async (req, res) => {
   try {
     const { wp_user_id, first_name, last_name, id_card, visit_date } = req.body;
-    
+
     // Validar campos requeridos
     if (!wp_user_id || !first_name || !last_name || !id_card || !visit_date) {
       return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
-    
+
     // Validar formato de fecha
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(visit_date)) {
       return res.status(400).json({ error: 'Formato de fecha inválido. Use AAAA-MM-DD' });
     }
-    
+
     const visitorData = {
       wp_user_id,
       first_name,
@@ -31,12 +31,12 @@ const createUniqueVisitorController = async (req, res) => {
       id_card,
       visit_date
     };
-    
-    const newVisitor = await createUniqueVisitor(visitorData);
+
+    const newVisitor = await createOrUpdateUniqueVisitor(visitorData);
     res.status(201).json(newVisitor);
   } catch (error) {
     console.error('Error al crear visitante único:', error);
-    if (error.message.includes('Ya existe un visitante frecuente') || 
+    if (error.message.includes('Ya existe un visitante frecuente') ||
         error.message.includes('Ya existe un visitante único')) {
       res.status(409).json({ error: error.message });
     } else {
@@ -49,23 +49,23 @@ const createUniqueVisitorController = async (req, res) => {
 const createFrequentVisitorController = async (req, res) => {
   try {
     const { wp_user_id, first_name, last_name, id_card, frequent_visit_description, frequent_visit_other_description } = req.body;
-    
+
     // Validar campos requeridos
     if (!wp_user_id || !first_name || !last_name || !id_card || !frequent_visit_description) {
       return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
-    
+
     // Validar descripción de visita frecuente
     const validDescriptions = ['Familia', 'Transporte Escolar', 'Proveedores', 'Otros'];
     if (!validDescriptions.includes(frequent_visit_description)) {
       return res.status(400).json({ error: 'Descripción de visita frecuente inválida' });
     }
-    
+
     // Validar descripción adicional si es "Otros"
     if (frequent_visit_description === 'Otros' && !frequent_visit_other_description) {
       return res.status(400).json({ error: 'Se requiere una descripción adicional cuando se selecciona "Otros"' });
     }
-    
+
     const visitorData = {
       wp_user_id,
       first_name,
@@ -74,7 +74,7 @@ const createFrequentVisitorController = async (req, res) => {
       frequent_visit_description,
       frequent_visit_other_description
     };
-    
+
     const newVisitor = await createFrequentVisitor(visitorData);
     res.status(201).json(newVisitor);
   } catch (error) {
@@ -91,11 +91,11 @@ const createFrequentVisitorController = async (req, res) => {
 const getVisitorHistoryController = async (req, res) => {
   try {
     const { wp_user_id } = req.params;
-    
+
     if (!wp_user_id) {
       return res.status(400).json({ error: 'Falta wp_user_id' });
     }
-    
+
     const history = await getVisitorHistory(wp_user_id);
     res.status(200).json({ visitor_history: history });
   } catch (error) {
@@ -108,16 +108,16 @@ const getVisitorHistoryController = async (req, res) => {
 const activateFrequentVisitorController = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!id) {
       return res.status(400).json({ error: 'Falta ID del visitante' });
     }
-    
+
     const result = await updateFrequentVisitorStatus(id, true);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Visitante frecuente no encontrado' });
     }
-    
+
     res.status(200).json({ message: 'Visitante frecuente activado exitosamente' });
   } catch (error) {
     console.error('Error al activar visitante frecuente:', error);
@@ -129,16 +129,16 @@ const activateFrequentVisitorController = async (req, res) => {
 const deactivateFrequentVisitorController = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!id) {
       return res.status(400).json({ error: 'Falta ID del visitante' });
     }
-    
+
     const result = await updateFrequentVisitorStatus(id, false);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Visitante frecuente no encontrado' });
     }
-    
+
     res.status(200).json({ message: 'Visitante frecuente desactivado exitosamente' });
   } catch (error) {
     console.error('Error al desactivar visitante frecuente:', error);
