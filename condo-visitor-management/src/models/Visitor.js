@@ -190,14 +190,6 @@ async function getTodaysVisitors() {
 }
 
 module.exports = {
-  createUniqueVisitor: createOrUpdateUniqueVisitor,
-  createFrequentVisitor,
-  getVisitorHistory,
-  updateFrequentVisitorStatus,
-  validateVisitor,
-  logVisitorArrival,
-  getTodaysVisitors
-module.exports = {
   createUniqueVisitor,
   createFrequentVisitor,
   getVisitorHistory,
