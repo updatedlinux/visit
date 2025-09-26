@@ -254,7 +254,12 @@ async function getVisitHistoryByDateController(req, res) {
 }
 
 module.exports = {
+  createUniqueVisitorController,
+  createFrequentVisitorController,
+  getVisitorHistoryController,
+  updateFrequentVisitorStatusController,
+  validateVisitorController,
+  logVisitorArrivalController,
   getTodaysVisitorsController,
-  getVisitHistoryByDateController,
-  // otros controladores existentes
+  getVisitHistoryByDateController
 };
