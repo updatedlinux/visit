@@ -51,8 +51,6 @@ const visitorController = require('../controllers/visitorController');
  */
 router.post('/new', visitorController.createUniqueVisitorController);
 
-router.post('/new/frequent', visitorController.createFrequentVisitorControllerController);
-
 router.post('/new/frequent', visitorController.createFrequentVisitorController);
 
 /**
