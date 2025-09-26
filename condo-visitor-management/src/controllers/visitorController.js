@@ -1,3 +1,5 @@
+const Visitor = require('../models/Visitor');
+
 // Crear un nuevo visitante único
 const createUniqueVisitor = async (req, res) => {
   try {

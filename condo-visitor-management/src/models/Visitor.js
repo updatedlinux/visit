@@ -1,4 +1,127 @@
-// Obtener historial de visitantes para un usuario de WordPress
+const db = require('../config/database');
+
+class Visitor {
+  // Crear un nuevo visitante único
+  static async createUniqueVisitor(visitorData) {
+    const { wp_user_id, first_name, last_name, id_card, visit_date } = visitorData;
+    const connection = await db.getConnection();
+    
+    try {
+      await connection.beginTransaction();
+      
+      // Verificar si ya existe un visitante frecuente con esta cédula
+      const [frequentVisitor] = await connection.execute(
+        'SELECT id, active FROM condo360_visitors WHERE id_card = ? AND visit_type = ?',
+        [id_card, 'frequent']
+      );
+      
+      if (frequentVisitor.length > 0) {
+        if (frequentVisitor[0].active) {
+          throw new Error('Ya existe un visitante frecuente activo con esta cédula. No se puede crear un visitante único.');
+        } else {
+          throw new Error('Ya existe un visitante frecuente inactivo con esta cédula. Active el visitante frecuente existente en lugar de crear uno nuevo.');
+        }
+      }
+      
+      // Verificar si ya existe un visitante único con la misma cédula para la misma fecha
+      const [existingVisitor] = await connection.execute(
+        'SELECT id FROM condo360_visitors WHERE id_card = ? AND visit_date = ? AND visit_type = ?',
+        [id_card, visit_date, 'unique']
+      );
+      
+      if (existingVisitor.length > 0) {
+        throw new Error('Ya existe un visitante único con esta cédula para la fecha especificada.');
+      }
+      
+      // Insertar el nuevo visitante único
+      const [result] = await connection.execute(
+        `INSERT INTO condo360_visitors 
+        (wp_user_id, first_name, last_name, id_card, visit_date, visit_type) 
+        VALUES (?, ?, ?, ?, ?, 'unique')`,
+        [wp_user_id, first_name, last_name, id_card, visit_date]
+      );
+      
+      await connection.commit();
+      
+      // Obtener el visitante recién creado con información del propietario
+      const [rows] = await connection.execute(
+        `SELECT v.*, u.display_name as owner_name 
+        FROM condo360_visitors v 
+        JOIN wp_users u ON v.wp_user_id = u.ID 
+        WHERE v.id = ?`,
+        [result.insertId]
+      );
+      
+      return rows[0];
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  // Crear un nuevo visitante frecuente
+  static async createFrequentVisitor(visitorData) {
+    const { wp_user_id, first_name, last_name, id_card, frequent_visit_description, frequent_visit_other_description } = visitorData;
+    const connection = await db.getConnection();
+    
+    try {
+      await connection.beginTransaction();
+      
+      // Verificar si ya existe un visitante frecuente con esta cédula
+      const [existingVisitor] = await connection.execute(
+        'SELECT id, active FROM condo360_visitors WHERE id_card = ? AND visit_type = ?',
+        [id_card, 'frequent']
+      );
+      
+      if (existingVisitor.length > 0) {
+        if (existingVisitor[0].active) {
+          throw new Error('Ya existe un visitante frecuente activo con esta cédula.');
+        } else {
+          throw new Error('Ya existe un visitante frecuente inactivo con esta cédula. Active el visitante frecuente existente en lugar de crear uno nuevo.');
+        }
+      }
+      
+      // Verificar si ya existe un visitante único con la misma cédula
+      const [uniqueVisitor] = await connection.execute(
+        'SELECT id FROM condo360_visitors WHERE id_card = ? AND visit_type = ?',
+        [id_card, 'unique']
+      );
+      
+      if (uniqueVisitor.length > 0) {
+        throw new Error('Ya existe un visitante único con esta cédula. No se puede crear un visitante frecuente.');
+      }
+      
+      // Insertar el nuevo visitante frecuente
+      const [result] = await connection.execute(
+        `INSERT INTO condo360_visitors 
+        (wp_user_id, first_name, last_name, id_card, visit_type, frequent_visit_description, frequent_visit_other_description, active) 
+        VALUES (?, ?, ?, ?, 'frequent', ?, ?, 1)`,
+        [wp_user_id, first_name, last_name, id_card, frequent_visit_description, frequent_visit_other_description || null]
+      );
+      
+      await connection.commit();
+      
+      // Obtener el visitante recién creado con información del propietario
+      const [rows] = await connection.execute(
+        `SELECT v.*, u.display_name as owner_name 
+        FROM condo360_visitors v 
+        JOIN wp_users u ON v.wp_user_id = u.ID 
+        WHERE v.id = ?`,
+        [result.insertId]
+      );
+      
+      return rows[0];
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  // Obtener historial de visitantes para un usuario de WordPress
   static async getVisitorHistory(wp_user_id) {
     const query = `
       SELECT v.*, u.display_name as owner_name
