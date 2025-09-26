@@ -197,4 +197,12 @@ module.exports = {
   validateVisitor,
   logVisitorArrival,
   getTodaysVisitors
+module.exports = {
+  createUniqueVisitor,
+  createFrequentVisitor,
+  getVisitorHistory,
+  updateFrequentVisitorStatus,
+  validateVisitor,
+  logVisitorArrival,
+  getTodaysVisitors
 };
