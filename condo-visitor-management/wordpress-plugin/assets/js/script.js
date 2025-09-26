@@ -49,7 +49,7 @@ jQuery(document).ready(function($) {
         
         // Enviar solicitud AJAX
         $.ajax({
-            url: condo_visitor_ajax.api_url + '/new',
+            url: 'https://api.bonaventurecclub.com/visit/new',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(formData),
@@ -99,7 +99,7 @@ jQuery(document).ready(function($) {
         
         // Enviar solicitud AJAX
         $.ajax({
-            url: condo_visitor_ajax.api_url + '/new/frequent',
+            url: 'https://api.bonaventurecclub.com/visit/new/frequent',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(formData),
@@ -143,7 +143,7 @@ jQuery(document).ready(function($) {
         
         // Enviar solicitud AJAX
         $.ajax({
-            url: condo_visitor_ajax.api_url + '/validate/' + encodeURIComponent(idCard),
+            url: 'https://api.bonaventurecclub.com/visit/validate/' + encodeURIComponent(idCard),
             method: 'GET',
             success: function(response) {
                 if (response.valid && response.visitor) {
@@ -177,7 +177,7 @@ jQuery(document).ready(function($) {
         
         // Enviar solicitud AJAX
         $.ajax({
-            url: condo_visitor_ajax.api_url + '/log/' + visitorId,
+            url: 'https://api.bonaventurecclub.com/visit/log/' + visitorId,
             method: 'POST',
             success: function(response) {
                 showMessage('Llegada registrada exitosamente', 'success');
@@ -213,7 +213,7 @@ jQuery(document).ready(function($) {
         
         // Enviar solicitud AJAX
         $.ajax({
-            url: condo_visitor_ajax.api_url + endpoint,
+            url: 'https://api.bonaventurecclub.com/visit' + endpoint,
             method: 'PUT',
             success: function(response) {
                 showMessage('Estado actualizado exitosamente', 'success');

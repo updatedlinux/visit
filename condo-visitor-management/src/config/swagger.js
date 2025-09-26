@@ -15,7 +15,7 @@ const options = {
         description: 'Servidor de producción',
       },
       {
-        url: 'http://localhost:3000/visit',
+        url: 'http://localhost:4000',
         description: 'Servidor de desarrollo',
       },
     ],

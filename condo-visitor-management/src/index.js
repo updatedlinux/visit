@@ -4,7 +4,7 @@ const visitorRoutes = require('./routes/visitorRoutes');
 const swagger = require('./config/swagger');
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors);
@@ -14,10 +14,10 @@ app.use(express.json());
 app.use('/visit', visitorRoutes);
 
 // Documentación Swagger
-app.use('/visit/api-docs', swagger.serve, swagger.setup);
+app.use('/api-docs', swagger.serve, swagger.setup);
 
 // Endpoint de verificación de salud
-app.get('/visit/health', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
@@ -34,7 +34,7 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en el puerto ${PORT}`);
-  console.log(`Documentación API disponible en http://localhost:${PORT}/visit/api-docs`);
+  console.log(`Documentación API disponible en http://localhost:${PORT}/api-docs`);
 });
 
 module.exports = app;
