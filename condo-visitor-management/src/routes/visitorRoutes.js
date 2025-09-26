@@ -53,7 +53,7 @@ router.post('/new', visitorController.createUniqueVisitor);
 
 /**
  * @swagger
- * /visit/new/frequent:
+ * /new/frequent:
  *   post:
  *     tags: [Visitantes]
  *     summary: Crear un nuevo visitante frecuente

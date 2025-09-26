@@ -1,5 +1,5 @@
 const {
-  createOrUpdateUniqueVisitor,
+  createUniqueVisitor,
   createFrequentVisitor,
   getVisitorHistory,
   updateFrequentVisitorStatus,
@@ -32,7 +32,7 @@ const createUniqueVisitorController = async (req, res) => {
       visit_date
     };
 
-    const newVisitor = await createOrUpdateUniqueVisitor(visitorData);
+    const newVisitor = await createUniqueVisitor(visitorData);
     res.status(201).json(newVisitor);
   } catch (error) {
     console.error('Error al crear visitante único:', error);
