@@ -189,8 +189,14 @@ function getTodaysVisitors() {
     WHERE v.visit_type = 'unique' AND v.visit_date = ?
     ORDER BY v.created_at DESC
   `;
-  const [rows] = await db.execute(query, [today]);
-  return rows;
+  return db.execute(query, [today]).then(([rows]) => {
+    return rows.map(row => {
+      if (row.visit_date) {
+        row.visit_date = formatDate(row.visit_date);
+      }
+      return row;
+    });
+  });
 }
 
 module.exports = {
