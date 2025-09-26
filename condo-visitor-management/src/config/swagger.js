@@ -28,7 +28,7 @@ const options = {
             wp_user_id: {
               type: 'integer',
               description: 'ID de usuario de WordPress del residente',
-              example: 123,
+              example: 1,
             },
             first_name: {
               type: 'string',
@@ -60,7 +60,7 @@ const options = {
             wp_user_id: {
               type: 'integer',
               description: 'ID de usuario de WordPress del residente',
-              example: 123,
+              example: 1,
             },
             first_name: {
               type: 'string',
@@ -101,7 +101,7 @@ const options = {
               },
               wp_user_id: {
                 type: 'integer',
-                example: 123,
+                example: 1,
               },
               first_name: {
                 type: 'string',
@@ -161,7 +161,7 @@ const options = {
                 },
                 wp_user_id: {
                   type: 'integer',
-                  example: 123,
+                  example: 1,
                 },
                 first_name: {
                   type: 'string',
