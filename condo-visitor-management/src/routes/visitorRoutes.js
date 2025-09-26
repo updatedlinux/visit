@@ -49,7 +49,11 @@ const visitorController = require('../controllers/visitorController');
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/new', visitorController.createUniqueVisitor);
+router.post('/new', visitorController.createUniqueVisitorController);
+
+router.post('/new/frequent', visitorController.createFrequentVisitorControllerController);
+
+router.post('/new/frequent', visitorController.createFrequentVisitorController);
 
 /**
  * @swagger
