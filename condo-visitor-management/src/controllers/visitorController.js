@@ -1,7 +1,15 @@
-const Visitor = require('../models/Visitor');
+const { 
+  createUniqueVisitor,
+  createFrequentVisitor,
+  getVisitorHistory,
+  updateFrequentVisitorStatus,
+  validateVisitor,
+  logVisitorArrival,
+  getTodaysVisitors
+} = require('../models/Visitor');
 
 // Crear un nuevo visitante único
-const createUniqueVisitor = async (req, res) => {
+const createUniqueVisitorController = async (req, res) => {
   try {
     const { wp_user_id, first_name, last_name, id_card, visit_date } = req.body;
     
@@ -24,7 +32,7 @@ const createUniqueVisitor = async (req, res) => {
       visit_date
     };
     
-    const newVisitor = await Visitor.createUniqueVisitor(visitorData);
+    const newVisitor = await createUniqueVisitor(visitorData);
     res.status(201).json(newVisitor);
   } catch (error) {
     console.error('Error al crear visitante único:', error);
@@ -38,7 +46,7 @@ const createUniqueVisitor = async (req, res) => {
 };
 
 // Crear un nuevo visitante frecuente
-const createFrequentVisitor = async (req, res) => {
+const createFrequentVisitorController = async (req, res) => {
   try {
     const { wp_user_id, first_name, last_name, id_card, frequent_visit_description, frequent_visit_other_description } = req.body;
     
@@ -67,7 +75,7 @@ const createFrequentVisitor = async (req, res) => {
       frequent_visit_other_description
     };
     
-    const newVisitor = await Visitor.createFrequentVisitor(visitorData);
+    const newVisitor = await createFrequentVisitor(visitorData);
     res.status(201).json(newVisitor);
   } catch (error) {
     console.error('Error al crear visitante frecuente:', error);
@@ -80,7 +88,7 @@ const createFrequentVisitor = async (req, res) => {
 };
 
 // Obtener historial de visitantes para un usuario de WordPress
-const getVisitorHistory = async (req, res) => {
+const getVisitorHistoryController = async (req, res) => {
   try {
     const { wp_user_id } = req.params;
     
@@ -88,7 +96,7 @@ const getVisitorHistory = async (req, res) => {
       return res.status(400).json({ error: 'Falta wp_user_id' });
     }
     
-    const history = await Visitor.getVisitorHistory(wp_user_id);
+    const history = await getVisitorHistory(wp_user_id);
     res.status(200).json({ visitor_history: history });
   } catch (error) {
     console.error('Error al obtener historial de visitantes:', error);
@@ -97,7 +105,7 @@ const getVisitorHistory = async (req, res) => {
 };
 
 // Activar un visitante frecuente
-const activateFrequentVisitor = async (req, res) => {
+const activateFrequentVisitorController = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -105,7 +113,7 @@ const activateFrequentVisitor = async (req, res) => {
       return res.status(400).json({ error: 'Falta ID del visitante' });
     }
     
-    const result = await Visitor.updateFrequentVisitorStatus(id, true);
+    const result = await updateFrequentVisitorStatus(id, true);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Visitante frecuente no encontrado' });
     }
@@ -118,7 +126,7 @@ const activateFrequentVisitor = async (req, res) => {
 };
 
 // Desactivar un visitante frecuente
-const deactivateFrequentVisitor = async (req, res) => {
+const deactivateFrequentVisitorController = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -126,7 +134,7 @@ const deactivateFrequentVisitor = async (req, res) => {
       return res.status(400).json({ error: 'Falta ID del visitante' });
     }
     
-    const result = await Visitor.updateFrequentVisitorStatus(id, false);
+    const result = await updateFrequentVisitorStatus(id, false);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Visitante frecuente no encontrado' });
     }
@@ -139,7 +147,7 @@ const deactivateFrequentVisitor = async (req, res) => {
 };
 
 // Validar un visitante por cédula
-const validateVisitor = async (req, res) => {
+const validateVisitorController = async (req, res) => {
   try {
     const { id_card } = req.params;
     
@@ -147,7 +155,7 @@ const validateVisitor = async (req, res) => {
       return res.status(400).json({ error: 'Falta número de cédula' });
     }
     
-    const visitor = await Visitor.validateVisitor(id_card);
+    const visitor = await validateVisitor(id_card);
     if (!visitor) {
       return res.status(404).json({ 
         valid: false, 
@@ -166,7 +174,7 @@ const validateVisitor = async (req, res) => {
 };
 
 // Registrar llegada de visitante
-const logVisitorArrival = async (req, res) => {
+const logVisitorArrivalController = async (req, res) => {
   try {
     const { visitor_id } = req.params;
     
@@ -174,7 +182,7 @@ const logVisitorArrival = async (req, res) => {
       return res.status(400).json({ error: 'Falta ID del visitante' });
     }
     
-    const result = await Visitor.logVisitorArrival(visitor_id);
+    const result = await logVisitorArrival(visitor_id);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Visitante no encontrado' });
     }
@@ -187,9 +195,9 @@ const logVisitorArrival = async (req, res) => {
 };
 
 // Obtener visitantes de hoy
-const getTodaysVisitors = async (req, res) => {
+const getTodaysVisitorsController = async (req, res) => {
   try {
-    const visitors = await Visitor.getTodaysVisitors();
+    const visitors = await getTodaysVisitors();
     res.status(200).json({ visitors: visitors });
   } catch (error) {
     console.error('Error al obtener visitantes de hoy:', error);
@@ -198,12 +206,12 @@ const getTodaysVisitors = async (req, res) => {
 };
 
 module.exports = {
-  createUniqueVisitor,
-  createFrequentVisitor,
-  getVisitorHistory,
-  activateFrequentVisitor,
-  deactivateFrequentVisitor,
-  validateVisitor,
-  logVisitorArrival,
-  getTodaysVisitors
+  createUniqueVisitor: createUniqueVisitorController,
+  createFrequentVisitor: createFrequentVisitorController,
+  getVisitorHistory: getVisitorHistoryController,
+  activateFrequentVisitor: activateFrequentVisitorController,
+  deactivateFrequentVisitor: deactivateFrequentVisitorController,
+  validateVisitor: validateVisitorController,
+  logVisitorArrival: logVisitorArrivalController,
+  getTodaysVisitors: getTodaysVisitorsController
 };
