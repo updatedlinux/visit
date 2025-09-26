@@ -166,13 +166,12 @@ async function validateVisitor(id_card) {
 }
 
 // Registrar llegada de visitante
-async function logVisitorArrival(visitor_id) {
+function logVisitorArrival(visitor_id) {
   const query = `
-    INSERT INTO condo360_visitor_logs (visitor_id, arrival_time)
+    INSERT INTO condo360_visit_logs (visitor_id, arrival_time)
     VALUES (?, NOW())
   `;
-  const [result] = await db.execute(query, [visitor_id]);
-  return result;
+  return db.execute(query, [visitor_id]);
 }
 
 // Obtener visitantes de hoy
