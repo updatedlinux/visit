@@ -99,7 +99,7 @@ router.post('/new/frequent', visitorController.createFrequentVisitorController);
 
 /**
  * @swagger
- * /visit/history/{wp_user_id}:
+ * /history/{wp_user_id}:
  *   get:
  *     tags: [Visitantes]
  *     summary: Obtener historial de visitantes para un usuario
@@ -131,7 +131,7 @@ router.get('/history/:wp_user_id', visitorController.getVisitorHistoryController
 
 /**
  * @swagger
- * /visit/frequent/{id}/activate:
+ * /frequent/{id}/activate:
  *   put:
  *     tags: [Visitantes]
  *     summary: Activar un visitante frecuente
@@ -156,7 +156,7 @@ router.put('/frequent/:id/activate', visitorController.activateFrequentVisitorCo
 
 /**
  * @swagger
- * /visit/frequent/{id}/deactivate:
+ * /frequent/{id}/deactivate:
  *   put:
  *     tags: [Visitantes]
  *     summary: Desactivar un visitante frecuente
@@ -181,7 +181,7 @@ router.put('/frequent/:id/deactivate', visitorController.deactivateFrequentVisit
 
 /**
  * @swagger
- * /visit/validate/{id_card}:
+ * /validate/{id_card}:
  *   get:
  *     tags: [Visitantes]
  *     summary: Validar un visitante por cédula
@@ -215,7 +215,7 @@ router.get('/validate/:id_card', visitorController.validateVisitorController);
 
 /**
  * @swagger
- * /visit/log/{visitor_id}:
+ * /log/{visitor_id}:
  *   post:
  *     tags: [Visitantes]
  *     summary: Registrar llegada de visitante
@@ -238,7 +238,7 @@ router.post('/log/:visitor_id', visitorController.logVisitorArrivalController);
 
 /**
  * @swagger
- * /visit/today:
+ * /today:
  *   get:
  *     tags: [Visitantes]
  *     summary: Obtener visitantes de hoy
@@ -252,7 +252,7 @@ router.get('/today', visitorController.getTodaysVisitorsController);
 
 /**
  * @swagger
- * /visit/history/date/{date}:
+ * /history/date/{date}:
  *   get:
  *     tags: [Visitantes]
  *     summary: Obtener visitantes de una fecha específica
@@ -285,7 +285,7 @@ router.get('/history/date/:date', visitorController.getVisitorsByDateController)
 
 /**
  * @swagger
- * /visit/frequent/user/{wp_user_id}:
+ * /frequent/user/{wp_user_id}:
  *   get:
  *     tags: [Visitantes]
  *     summary: Obtener visitantes frecuentes de un usuario específico
@@ -314,5 +314,28 @@ router.get('/history/date/:date', visitorController.getVisitorsByDateController)
  *         description: Error interno del servidor
  */
 router.get('/frequent/user/:wp_user_id', visitorController.getFrequentVisitorsByUserController);
+
+/**
+ * @swagger
+ * /debug/time:
+ *   get:
+ *     tags: [Debug]
+ *     summary: Endpoint de debug para verificar zona horaria
+ *     responses:
+ *       200:
+ *         description: Información de zona horaria
+ */
+router.get('/debug/time', (req, res) => {
+  const moment = require('moment-timezone');
+  const now = new Date();
+  const venezuelaTime = moment().tz('America/Caracas');
+  
+  res.json({
+    utc_time: now.toISOString(),
+    venezuela_time: venezuelaTime.format('DD/MM/YYYY hh:mm:ss A'),
+    venezuela_iso: venezuelaTime.toISOString(),
+    timezone_offset: venezuelaTime.format('Z')
+  });
+});
 
 module.exports = router;
