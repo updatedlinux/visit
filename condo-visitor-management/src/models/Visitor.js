@@ -103,7 +103,7 @@ function logVisitorArrival(visitor_id) {
   return db.execute(query, [visitor_id]);
 }
 
-// Obtener visitantes de hoy
+// Obtener visitantes de hoy (solo visitas únicas)
 function getTodaysVisitors() {
   const today = new Date().toISOString().split('T')[0];
   const query = `
@@ -115,10 +115,7 @@ function getTodaysVisitors() {
     FROM condo360_visitors v
     JOIN wp_users u ON v.wp_user_id = u.ID
     LEFT JOIN condo360_visit_logs vl ON v.id = vl.visitor_id AND DATE(vl.arrival_datetime) = ?
-    WHERE (
-      (v.visit_type = 'unique' AND v.visit_date = ?) OR
-      (v.visit_type = 'frequent' AND v.active = 1)
-    )
+    WHERE v.visit_type = 'unique' AND v.visit_date = ?
     ORDER BY v.created_at DESC
   `;
   return db.execute(query, [today, today]).then(([rows]) => rows);
