@@ -107,6 +107,8 @@ jQuery(document).ready(function($) {
                 showMessage('Visitante frecuente registrado exitosamente', 'success');
                 form[0].reset();
                 $('#other-description-field').hide();
+                // Disparar evento para recargar la lista de visitantes frecuentes
+                $(document).trigger('visitor-registered');
             },
             error: function(xhr) {
                 let errorMessage = 'Error al registrar el visitante frecuente';

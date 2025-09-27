@@ -283,4 +283,36 @@ router.get('/today', visitorController.getTodaysVisitorsController);
  */
 router.get('/history/date/:date', visitorController.getVisitorsByDateController);
 
+/**
+ * @swagger
+ * /visit/frequent/user/{wp_user_id}:
+ *   get:
+ *     tags: [Visitantes]
+ *     summary: Obtener visitantes frecuentes de un usuario específico
+ *     parameters:
+ *       - in: path
+ *         name: wp_user_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de usuario de WordPress
+ *     responses:
+ *       200:
+ *         description: Visitantes frecuentes del usuario recuperados exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 visitors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: Falta wp_user_id
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/frequent/user/:wp_user_id', visitorController.getFrequentVisitorsByUserController);
+
 module.exports = router;

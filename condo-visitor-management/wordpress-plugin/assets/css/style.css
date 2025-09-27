@@ -273,3 +273,59 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Estilos para la lista de visitantes frecuentes */
+.condo-visitor-table-container {
+  overflow-x: auto;
+  margin-top: 15px;
+}
+
+.condo-visitor-status-active {
+  color: #28a745;
+  font-weight: 600;
+  background: #d4edda;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.condo-visitor-status-inactive {
+  color: #dc3545;
+  font-weight: 600;
+  background: #f8d7da;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.condo-visitor-btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+  margin: 0 2px;
+}
+
+.condo-visitor-loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.condo-visitor-no-data {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.condo-visitor-error {
+  text-align: center;
+  padding: 20px;
+  color: #dc3545;
+  background: #f8d7da;
+  border-radius: 4px;
+  margin: 10px 0;
+}

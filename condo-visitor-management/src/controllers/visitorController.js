@@ -6,7 +6,8 @@ const {
   validateVisitor,
   logVisitorArrival,
   getTodaysVisitors,
-  getVisitorsByDate
+  getVisitorsByDate,
+  getFrequentVisitorsByUser
 } = require('../models/Visitor');
 
 // Crear un nuevo visitante único
@@ -241,6 +242,23 @@ async function getVisitHistoryByDateController(req, res) {
   }
 }
 
+// Obtener visitantes frecuentes de un usuario específico
+async function getFrequentVisitorsByUserController(req, res) {
+  try {
+    const { wp_user_id } = req.params;
+    
+    if (!wp_user_id) {
+      return res.status(400).json({ error: 'Falta wp_user_id' });
+    }
+    
+    const visitors = await getFrequentVisitorsByUser(wp_user_id);
+    res.status(200).json({ visitors: visitors });
+  } catch (error) {
+    console.error('Error al obtener visitantes frecuentes del usuario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+}
+
 module.exports = {
   createUniqueVisitorController,
   createFrequentVisitorController,
@@ -251,5 +269,6 @@ module.exports = {
   logVisitorArrivalController,
   getTodaysVisitorsController,
   getVisitorsByDateController,
+  getFrequentVisitorsByUserController,
   getVisitHistoryByDateController
 };

@@ -144,6 +144,20 @@ function getVisitorsByDate(date) {
   return db.execute(query, [date, date]).then(([rows]) => rows);
 }
 
+// Obtener visitantes frecuentes de un usuario específico
+function getFrequentVisitorsByUser(wp_user_id) {
+  const query = `
+    SELECT 
+      v.*, 
+      u.display_name as owner_name
+    FROM condo360_visitors v
+    JOIN wp_users u ON v.wp_user_id = u.ID
+    WHERE v.wp_user_id = ? AND v.visit_type = 'frequent'
+    ORDER BY v.created_at DESC
+  `;
+  return db.execute(query, [wp_user_id]).then(([rows]) => rows);
+}
+
 module.exports = {
   createUniqueVisitor,
   createFrequentVisitor,
@@ -152,5 +166,6 @@ module.exports = {
   validateVisitor,
   logVisitorArrival,
   getTodaysVisitors,
-  getVisitorsByDate
+  getVisitorsByDate,
+  getFrequentVisitorsByUser
 };
