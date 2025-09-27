@@ -211,7 +211,7 @@ router.put('/frequent/:id/deactivate', visitorController.deactivateFrequentVisit
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/validate/:id_card', visitorController.validateVisitor);
+router.get('/validate/:id_card', visitorController.validateVisitorController);
 
 /**
  * @swagger
@@ -234,7 +234,7 @@ router.get('/validate/:id_card', visitorController.validateVisitor);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/log/:visitor_id', visitorController.logVisitorArrival);
+router.post('/log/:visitor_id', visitorController.logVisitorArrivalController);
 
 /**
  * @swagger
@@ -248,6 +248,6 @@ router.post('/log/:visitor_id', visitorController.logVisitorArrival);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/today', visitorController.getTodaysVisitors);
+router.get('/today', visitorController.getTodaysVisitorsController);
 
 module.exports = router;

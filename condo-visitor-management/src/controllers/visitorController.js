@@ -45,38 +45,6 @@ const createUniqueVisitorController = async (req, res) => {
   }
 };
 
-// Controlador para obtener visitantes de hoy
-async function getTodaysVisitorsController(req, res) {
-  try {
-    const visitors = await getTodaysVisitors();
-    res.json({ visitors });
-  } catch (error) {
-    console.error('Error al obtener visitantes de hoy:', error);
-    res.status(500).json({ error: 'Error al obtener visitantes de hoy' });
-  }
-}
-
-// Controlador para obtener historial de visitas filtrado por fecha
-async function getVisitHistoryByDateController(req, res) {
-  const date = req.query.date;
-  if (!date) {
-    return res.status(400).json({ error: 'Falta el parámetro date' });
-  }
-
-  // Opcional: validar formato de fecha
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(date)) {
-    return res.status(400).json({ error: 'Formato de fecha inválido. Use AAAA-MM-DD' });
-  }
-
-  try {
-    const history = await getVisitorHistory(date);
-    res.json({ history });
-  } catch (error) {
-    console.error('Error al obtener historial de visitas:', error);
-    res.status(500).json({ error: 'Error al obtener historial de visitas' });
-  }
-}
 
 // Crear un nuevo visitante frecuente
 const createFrequentVisitorController = async (req, res) => {
