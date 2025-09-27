@@ -97,7 +97,7 @@ function validateVisitor(id_card) {
 // Registrar llegada de visitante
 function logVisitorArrival(visitor_id) {
   const query = `
-    INSERT INTO condo360_visitor_logs (visitor_id, arrival_time)
+    INSERT INTO condo360_visit_logs (visitor_id, arrival_datetime)
     VALUES (?, NOW())
   `;
   return db.execute(query, [visitor_id]);
