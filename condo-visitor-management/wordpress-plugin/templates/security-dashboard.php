@@ -87,8 +87,8 @@ jQuery(document).ready(function($) {
         tbody.empty();
         if (response.visitors && response.visitors.length > 0) {
           response.visitors.forEach(function(visitor) {
-            var visitDate = visitor.visit_date ? new Date(visitor.visit_date).toLocaleDateString('es-ES') : 'Frecuente';
-            var arrivalTime = visitor.arrival_datetime ? new Date(visitor.arrival_datetime).toLocaleString('es-ES') : 'No registrada';
+            var visitDate = visitor.visit_date || 'Frecuente';
+            var arrivalTime = visitor.arrival_datetime || 'No registrada';
             var actionButton = visitor.arrival_datetime ? 
               '<span style="color: green;">✓ Llegada registrada</span>' : 
               '<button class="condo-visitor-btn log-arrival-btn" data-visitor-id="' + visitor.id + '">Registrar Llegada</button>';
@@ -126,8 +126,8 @@ jQuery(document).ready(function($) {
         tbody.empty();
         if (response.visitors && response.visitors.length > 0) {
           response.visitors.forEach(function(visit) {
-            var visitDate = visit.visit_date ? new Date(visit.visit_date).toLocaleDateString('es-ES') : 'Frecuente';
-            var arrivalTime = visit.arrival_datetime ? new Date(visit.arrival_datetime).toLocaleString('es-ES') : 'No registrada';
+            var visitDate = visit.visit_date || 'Frecuente';
+            var arrivalTime = visit.arrival_datetime || 'No registrada';
             
             var row = '<tr>' +
               '<td>' + visit.first_name + ' ' + visit.last_name + '</td>' +

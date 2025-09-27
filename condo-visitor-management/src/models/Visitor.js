@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { getCurrentVenezuelaDate } = require('../utils/timezone');
 
 // Crear un nuevo visitante único sin restricciones de duplicidad
 async function createUniqueVisitor(visitorData) {
@@ -80,7 +81,7 @@ function updateFrequentVisitorStatus(id, active) {
 
 // Validar visitante por cédula para el día actual
 function validateVisitor(id_card) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getCurrentVenezuelaDate();
   const query = `
     SELECT v.*, u.display_name as owner_name, u.user_email as owner_email
     FROM condo360_visitors v
@@ -105,7 +106,7 @@ function logVisitorArrival(visitor_id) {
 
 // Obtener visitantes de hoy (solo visitas únicas)
 function getTodaysVisitors() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getCurrentVenezuelaDate();
   const query = `
     SELECT 
       v.*, 

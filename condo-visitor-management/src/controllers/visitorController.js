@@ -9,6 +9,17 @@ const {
   getVisitorsByDate,
   getFrequentVisitorsByUser
 } = require('../models/Visitor');
+const { formatForDisplay, formatDateForDisplay } = require('../utils/timezone');
+
+// Función auxiliar para formatear visitantes con fechas en zona horaria de Venezuela
+function formatVisitorsWithTimezone(visitors) {
+  return visitors.map(visitor => ({
+    ...visitor,
+    visit_date: visitor.visit_date ? formatDateForDisplay(visitor.visit_date) : null,
+    arrival_datetime: visitor.arrival_datetime ? formatForDisplay(visitor.arrival_datetime) : null,
+    created_at: formatForDisplay(visitor.created_at)
+  }));
+}
 
 // Crear un nuevo visitante único
 const createUniqueVisitorController = async (req, res) => {
@@ -100,7 +111,8 @@ const getVisitorHistoryController = async (req, res) => {
     }
 
     const history = await getVisitorHistory(wp_user_id);
-    res.status(200).json({ visitor_history: history });
+    const formattedHistory = formatVisitorsWithTimezone(history);
+    res.status(200).json({ visitor_history: formattedHistory });
   } catch (error) {
     console.error('Error al obtener historial de visitantes:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -201,7 +213,8 @@ const logVisitorArrivalController = async (req, res) => {
 async function getTodaysVisitorsController(req, res) {
   try {
     const visitors = await getTodaysVisitors();
-    res.status(200).json({ visitors: visitors });
+    const formattedVisitors = formatVisitorsWithTimezone(visitors);
+    res.status(200).json({ visitors: formattedVisitors });
   } catch (error) {
     console.error('Error al obtener visitantes de hoy:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -220,7 +233,8 @@ async function getVisitorsByDateController(req, res) {
     }
     
     const visitors = await getVisitorsByDate(date);
-    res.status(200).json({ visitors: visitors });
+    const formattedVisitors = formatVisitorsWithTimezone(visitors);
+    res.status(200).json({ visitors: formattedVisitors });
   } catch (error) {
     console.error('Error al obtener visitantes por fecha:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -252,7 +266,8 @@ async function getFrequentVisitorsByUserController(req, res) {
     }
     
     const visitors = await getFrequentVisitorsByUser(wp_user_id);
-    res.status(200).json({ visitors: visitors });
+    const formattedVisitors = formatVisitorsWithTimezone(visitors);
+    res.status(200).json({ visitors: formattedVisitors });
   } catch (error) {
     console.error('Error al obtener visitantes frecuentes del usuario:', error);
     res.status(500).json({ error: 'Error interno del servidor' });

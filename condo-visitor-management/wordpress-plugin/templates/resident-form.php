@@ -135,6 +135,7 @@ jQuery(document).ready(function($) {
                     html += '<th>Cédula</th>';
                     html += '<th>Relación</th>';
                     html += '<th>Estado</th>';
+                    html += '<th>Fecha Registro</th>';
                     html += '<th>Acciones</th>';
                     html += '</tr></thead>';
                     html += '<tbody>';
@@ -146,12 +147,14 @@ jQuery(document).ready(function($) {
                         
                         const statusText = visitor.active ? 'Activo' : 'Inactivo';
                         const statusClass = visitor.active ? 'condo-visitor-status-active' : 'condo-visitor-status-inactive';
+                        const createdDate = visitor.created_at || 'N/A';
                         
                         html += '<tr>';
                         html += '<td>' + visitor.first_name + ' ' + visitor.last_name + '</td>';
                         html += '<td>' + visitor.id_card + '</td>';
                         html += '<td>' + (description || 'N/A') + '</td>';
                         html += '<td><span class="' + statusClass + '">' + statusText + '</span></td>';
+                        html += '<td>' + createdDate + '</td>';
                         html += '<td>';
                         if (visitor.active) {
                             html += '<button class="condo-visitor-btn condo-visitor-btn-small toggle-visitor-status" data-visitor-id="' + visitor.id + '" data-action="deactivate">Desactivar</button>';
