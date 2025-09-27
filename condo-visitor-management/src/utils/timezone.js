@@ -42,13 +42,13 @@ function toVenezuelaISO(date) {
 }
 
 /**
- * Formatea una fecha para mostrar en la interfaz (formato legible)
+ * Formatea una fecha para mostrar en la interfaz (formato legible con AM/PM)
  * @param {Date|string} date - Fecha a formatear
  * @returns {string} Fecha formateada para mostrar
  */
 function formatForDisplay(date) {
   if (!date) return 'No registrada';
-  return moment(date).tz(VENEZUELA_TIMEZONE).format('DD/MM/YYYY HH:mm:ss');
+  return moment(date).tz(VENEZUELA_TIMEZONE).format('DD/MM/YYYY hh:mm:ss A');
 }
 
 /**
@@ -61,6 +61,24 @@ function formatDateForDisplay(date) {
   return moment(date).tz(VENEZUELA_TIMEZONE).format('DD/MM/YYYY');
 }
 
+/**
+ * Convierte una fecha/hora a la zona horaria de Venezuela para almacenamiento
+ * @param {Date|string} date - Fecha a convertir
+ * @returns {Date} Fecha en zona horaria de Venezuela
+ */
+function toVenezuelaDateForStorage(date) {
+  if (!date) return null;
+  return moment(date).tz(VENEZUELA_TIMEZONE).toDate();
+}
+
+/**
+ * Obtiene la fecha/hora actual de Venezuela para almacenamiento
+ * @returns {Date} Fecha actual en zona horaria de Venezuela
+ */
+function getCurrentVenezuelaDateForStorage() {
+  return moment().tz(VENEZUELA_TIMEZONE).toDate();
+}
+
 module.exports = {
   toVenezuelaTime,
   getCurrentVenezuelaTime,
@@ -68,5 +86,7 @@ module.exports = {
   toVenezuelaISO,
   formatForDisplay,
   formatDateForDisplay,
+  toVenezuelaDateForStorage,
+  getCurrentVenezuelaDateForStorage,
   VENEZUELA_TIMEZONE
 };

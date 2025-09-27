@@ -1,5 +1,8 @@
 const db = require('../config/database');
-const { getCurrentVenezuelaDate } = require('../utils/timezone');
+const { getCurrentVenezuelaDate, getCurrentVenezuelaDateForStorage } = require('../utils/timezone');
+const moment = require('moment-timezone');
+
+const VENEZUELA_TIMEZONE = 'America/Caracas';
 
 // Crear un nuevo visitante único sin restricciones de duplicidad
 async function createUniqueVisitor(visitorData) {
@@ -97,16 +100,20 @@ function validateVisitor(id_card) {
 
 // Registrar llegada de visitante
 function logVisitorArrival(visitor_id) {
+  const venezuelaTime = getCurrentVenezuelaDateForStorage();
   const query = `
     INSERT INTO condo360_visit_logs (visitor_id, arrival_datetime)
-    VALUES (?, NOW())
+    VALUES (?, ?)
   `;
-  return db.execute(query, [visitor_id]);
+  return db.execute(query, [visitor_id, venezuelaTime]);
 }
 
 // Obtener visitantes de hoy (solo visitas únicas)
 function getTodaysVisitors() {
   const today = getCurrentVenezuelaDate();
+  const startOfDay = moment().tz(VENEZUELA_TIMEZONE).startOf('day').toDate();
+  const endOfDay = moment().tz(VENEZUELA_TIMEZONE).endOf('day').toDate();
+  
   const query = `
     SELECT 
       v.*, 
@@ -115,15 +122,20 @@ function getTodaysVisitors() {
       vl.id as log_id
     FROM condo360_visitors v
     JOIN wp_users u ON v.wp_user_id = u.ID
-    LEFT JOIN condo360_visit_logs vl ON v.id = vl.visitor_id AND DATE(vl.arrival_datetime) = ?
+    LEFT JOIN condo360_visit_logs vl ON v.id = vl.visitor_id 
+      AND vl.arrival_datetime >= ? AND vl.arrival_datetime <= ?
     WHERE v.visit_type = 'unique' AND v.visit_date = ?
     ORDER BY v.created_at DESC
   `;
-  return db.execute(query, [today, today]).then(([rows]) => rows);
+  return db.execute(query, [startOfDay, endOfDay, today]).then(([rows]) => rows);
 }
 
 // Obtener visitantes de una fecha específica
 function getVisitorsByDate(date) {
+  // Convertir la fecha a rango de zona horaria de Venezuela
+  const startOfDay = moment.tz(date, VENEZUELA_TIMEZONE).startOf('day').toDate();
+  const endOfDay = moment.tz(date, VENEZUELA_TIMEZONE).endOf('day').toDate();
+  
   const query = `
     SELECT 
       v.*, 
@@ -132,14 +144,15 @@ function getVisitorsByDate(date) {
       vl.id as log_id
     FROM condo360_visitors v
     JOIN wp_users u ON v.wp_user_id = u.ID
-    LEFT JOIN condo360_visit_logs vl ON v.id = vl.visitor_id AND DATE(vl.arrival_datetime) = ?
+    LEFT JOIN condo360_visit_logs vl ON v.id = vl.visitor_id 
+      AND vl.arrival_datetime >= ? AND vl.arrival_datetime <= ?
     WHERE (
       (v.visit_type = 'unique' AND v.visit_date = ?) OR
       (v.visit_type = 'frequent' AND v.active = 1)
     )
     ORDER BY v.created_at DESC
   `;
-  return db.execute(query, [date, date]).then(([rows]) => rows);
+  return db.execute(query, [startOfDay, endOfDay, date]).then(([rows]) => rows);
 }
 
 // Obtener visitantes frecuentes de un usuario específico
