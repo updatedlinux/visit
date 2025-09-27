@@ -5,7 +5,8 @@ const {
   updateFrequentVisitorStatus,
   validateVisitor,
   logVisitorArrival,
-  getTodaysVisitors
+  getTodaysVisitors,
+  getVisitorsByDate
 } = require('../models/Visitor');
 
 // Crear un nuevo visitante único
@@ -206,6 +207,25 @@ async function getTodaysVisitorsController(req, res) {
   }
 }
 
+// Obtener visitantes de una fecha específica
+async function getVisitorsByDateController(req, res) {
+  try {
+    const { date } = req.params;
+    
+    // Validar formato de fecha
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date)) {
+      return res.status(400).json({ error: 'Formato de fecha inválido. Use YYYY-MM-DD' });
+    }
+    
+    const visitors = await getVisitorsByDate(date);
+    res.status(200).json({ visitors: visitors });
+  } catch (error) {
+    console.error('Error al obtener visitantes por fecha:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+}
+
 // Obtener historial de visitas filtrado por fecha
 async function getVisitHistoryByDateController(req, res) {
   const date = req.query.date;
@@ -230,5 +250,6 @@ module.exports = {
   validateVisitorController,
   logVisitorArrivalController,
   getTodaysVisitorsController,
+  getVisitorsByDateController,
   getVisitHistoryByDateController
 };

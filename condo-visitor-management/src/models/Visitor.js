@@ -116,6 +116,18 @@ function getTodaysVisitors() {
   return db.execute(query, [today]).then(([rows]) => rows);
 }
 
+// Obtener visitantes de una fecha específica
+function getVisitorsByDate(date) {
+  const query = `
+    SELECT v.*, u.display_name as owner_name
+    FROM condo360_visitors v
+    JOIN wp_users u ON v.wp_user_id = u.ID
+    WHERE v.visit_type = 'unique' AND v.visit_date = ?
+    ORDER BY v.created_at DESC
+  `;
+  return db.execute(query, [date]).then(([rows]) => rows);
+}
+
 module.exports = {
   createUniqueVisitor,
   createFrequentVisitor,
@@ -123,5 +135,6 @@ module.exports = {
   updateFrequentVisitorStatus,
   validateVisitor,
   logVisitorArrival,
-  getTodaysVisitors
+  getTodaysVisitors,
+  getVisitorsByDate
 };

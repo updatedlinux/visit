@@ -250,4 +250,37 @@ router.post('/log/:visitor_id', visitorController.logVisitorArrivalController);
  */
 router.get('/today', visitorController.getTodaysVisitorsController);
 
+/**
+ * @swagger
+ * /visit/history/date/{date}:
+ *   get:
+ *     tags: [Visitantes]
+ *     summary: Obtener visitantes de una fecha específica
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Fecha en formato YYYY-MM-DD
+ *     responses:
+ *       200:
+ *         description: Visitantes de la fecha especificada recuperados exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 visitors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: Formato de fecha inválido
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/history/date/:date', visitorController.getVisitorsByDateController);
+
 module.exports = router;
