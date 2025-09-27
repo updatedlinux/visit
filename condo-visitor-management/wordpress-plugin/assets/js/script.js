@@ -182,7 +182,16 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 showMessage('Llegada registrada exitosamente', 'success');
                 // Actualizar botón para mostrar que fue registrado
-                btn.text('Llegada registrada').removeClass('log-arrival-btn').addClass('arrival-logged');
+                btn.html('<span style="color: green;">✓ Llegada registrada</span>').removeClass('log-arrival-btn').addClass('arrival-logged');
+                
+                // Recargar las tablas para mostrar la actualización
+                if (typeof loadTodaysVisitors === 'function') {
+                    loadTodaysVisitors();
+                }
+                if (typeof loadVisitHistory === 'function') {
+                    var selectedDate = $('#history-date-filter').val();
+                    loadVisitHistory(selectedDate);
+                }
             },
             error: function(xhr) {
                 let errorMessage = 'Error al registrar la llegada';

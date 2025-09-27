@@ -107,25 +107,41 @@ function logVisitorArrival(visitor_id) {
 function getTodaysVisitors() {
   const today = new Date().toISOString().split('T')[0];
   const query = `
-    SELECT v.*, u.display_name as owner_name
+    SELECT 
+      v.*, 
+      u.display_name as owner_name,
+      vl.arrival_datetime,
+      vl.id as log_id
     FROM condo360_visitors v
     JOIN wp_users u ON v.wp_user_id = u.ID
-    WHERE v.visit_type = 'unique' AND v.visit_date = ?
+    LEFT JOIN condo360_visit_logs vl ON v.id = vl.visitor_id AND DATE(vl.arrival_datetime) = ?
+    WHERE (
+      (v.visit_type = 'unique' AND v.visit_date = ?) OR
+      (v.visit_type = 'frequent' AND v.active = 1)
+    )
     ORDER BY v.created_at DESC
   `;
-  return db.execute(query, [today]).then(([rows]) => rows);
+  return db.execute(query, [today, today]).then(([rows]) => rows);
 }
 
 // Obtener visitantes de una fecha específica
 function getVisitorsByDate(date) {
   const query = `
-    SELECT v.*, u.display_name as owner_name
+    SELECT 
+      v.*, 
+      u.display_name as owner_name,
+      vl.arrival_datetime,
+      vl.id as log_id
     FROM condo360_visitors v
     JOIN wp_users u ON v.wp_user_id = u.ID
-    WHERE v.visit_type = 'unique' AND v.visit_date = ?
+    LEFT JOIN condo360_visit_logs vl ON v.id = vl.visitor_id AND DATE(vl.arrival_datetime) = ?
+    WHERE (
+      (v.visit_type = 'unique' AND v.visit_date = ?) OR
+      (v.visit_type = 'frequent' AND v.active = 1)
+    )
     ORDER BY v.created_at DESC
   `;
-  return db.execute(query, [date]).then(([rows]) => rows);
+  return db.execute(query, [date, date]).then(([rows]) => rows);
 }
 
 module.exports = {

@@ -87,14 +87,19 @@ jQuery(document).ready(function($) {
         tbody.empty();
         if (response.visitors && response.visitors.length > 0) {
           response.visitors.forEach(function(visitor) {
-            var visitDate = new Date(visitor.visit_date).toLocaleDateString('es-ES');
+            var visitDate = visitor.visit_date ? new Date(visitor.visit_date).toLocaleDateString('es-ES') : 'Frecuente';
+            var arrivalTime = visitor.arrival_datetime ? new Date(visitor.arrival_datetime).toLocaleString('es-ES') : 'No registrada';
+            var actionButton = visitor.arrival_datetime ? 
+              '<span style="color: green;">✓ Llegada registrada</span>' : 
+              '<button class="condo-visitor-btn log-arrival-btn" data-visitor-id="' + visitor.id + '">Registrar Llegada</button>';
+            
             var row = '<tr>' +
               '<td>' + visitor.first_name + ' ' + visitor.last_name + '</td>' +
               '<td>' + visitor.id_card + '</td>' +
               '<td>' + visitor.owner_name + '</td>' +
               '<td>' + (visitor.visit_type === 'unique' ? 'Única' : 'Frecuente') + '</td>' +
               '<td>' + visitDate + '</td>' +
-              '<td><button class="condo-visitor-btn log-arrival-btn" data-visitor-id="' + visitor.id + '">Registrar Llegada</button></td>' +
+              '<td>' + actionButton + '</td>' +
               '</tr>';
             tbody.append(row);
           });
@@ -121,14 +126,16 @@ jQuery(document).ready(function($) {
         tbody.empty();
         if (response.visitors && response.visitors.length > 0) {
           response.visitors.forEach(function(visit) {
-            var visitDate = new Date(visit.visit_date).toLocaleDateString('es-ES');
+            var visitDate = visit.visit_date ? new Date(visit.visit_date).toLocaleDateString('es-ES') : 'Frecuente';
+            var arrivalTime = visit.arrival_datetime ? new Date(visit.arrival_datetime).toLocaleString('es-ES') : 'No registrada';
+            
             var row = '<tr>' +
               '<td>' + visit.first_name + ' ' + visit.last_name + '</td>' +
               '<td>' + visit.id_card + '</td>' +
               '<td>' + visit.owner_name + '</td>' +
               '<td>' + (visit.visit_type === 'unique' ? 'Única' : 'Frecuente') + '</td>' +
               '<td>' + visitDate + '</td>' +
-              '<td>' + (visit.arrival_datetime ? new Date(visit.arrival_datetime).toLocaleString('es-ES') : 'No registrada') + '</td>' +
+              '<td>' + arrivalTime + '</td>' +
               '</tr>';
             tbody.append(row);
           });
