@@ -245,15 +245,22 @@ jQuery(document).ready(function($) {
     }
     
     visitors.forEach(function(visitor) {
+      var visitDate = visitor.visit_date || 'Frecuente';
+      var entryType = visitor.log_visit_type ? (visitor.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
+      var vehiclePlate = visitor.vehicle_plate || '-';
+      var actionButton = visitor.arrival_datetime ? 
+        '<span style="color: green;">✓ Llegada registrada</span>' : 
+        '<button class="condo-visitor-btn log-arrival-btn" data-visitor-id="' + visitor.id + '">Registrar Llegada</button>';
+      
       const row = $('<tr></tr>');
       row.append('<td>' + visitor.first_name + ' ' + visitor.last_name + '</td>');
       row.append('<td>' + visitor.id_card + '</td>');
       row.append('<td>' + visitor.owner_name + '</td>');
       row.append('<td>' + (visitor.visit_type === 'unique' ? 'Única' : 'Frecuente') + '</td>');
-      row.append('<td>' + visitor.visit_date + '</td>');
-      row.append('<td>' + (visitor.log_visit_type || 'N/A') + '</td>');
-      row.append('<td>' + (visitor.vehicle_plate || 'N/A') + '</td>');
-      row.append('<td><button class="condo-visitor-btn log-arrival-btn" data-visitor-id="' + visitor.id + '">Registrar Llegada</button></td>');
+      row.append('<td>' + visitDate + '</td>');
+      row.append('<td>' + entryType + '</td>');
+      row.append('<td>' + vehiclePlate + '</td>');
+      row.append('<td>' + actionButton + '</td>');
       tbody.append(row);
     });
   }
@@ -268,15 +275,20 @@ jQuery(document).ready(function($) {
     }
     
     visitors.forEach(function(visitor) {
+      var visitDate = visitor.visit_date || 'Frecuente';
+      var entryType = visitor.log_visit_type ? (visitor.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
+      var vehiclePlate = visitor.vehicle_plate || '-';
+      var arrivalTime = visitor.arrival_datetime || 'No registrada';
+      
       const row = $('<tr></tr>');
       row.append('<td>' + visitor.first_name + ' ' + visitor.last_name + '</td>');
       row.append('<td>' + visitor.id_card + '</td>');
       row.append('<td>' + visitor.owner_name + '</td>');
       row.append('<td>' + (visitor.visit_type === 'unique' ? 'Única' : 'Frecuente') + '</td>');
-      row.append('<td>' + visitor.visit_date + '</td>');
-      row.append('<td>' + (visitor.log_visit_type || 'N/A') + '</td>');
-      row.append('<td>' + (visitor.vehicle_plate || 'N/A') + '</td>');
-      row.append('<td>' + (visitor.arrival_datetime || 'N/A') + '</td>');
+      row.append('<td>' + visitDate + '</td>');
+      row.append('<td>' + entryType + '</td>');
+      row.append('<td>' + vehiclePlate + '</td>');
+      row.append('<td>' + arrivalTime + '</td>');
       tbody.append(row);
     });
   }
@@ -287,32 +299,22 @@ jQuery(document).ready(function($) {
       url: condo_visitor_ajax.api_url + '/today',
       method: 'GET',
       success: function(response) {
-        var tbody = $('#todays-visitors tbody');
-        tbody.empty();
         if (response.visitors && response.visitors.length > 0) {
-          response.visitors.forEach(function(visitor) {
-            var visitDate = visitor.visit_date || 'Frecuente';
-            var arrivalTime = visitor.arrival_datetime || 'No registrada';
-            var entryType = visitor.log_visit_type ? (visitor.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
-            var vehiclePlate = visitor.vehicle_plate || '-';
-            var actionButton = visitor.arrival_datetime ? 
-              '<span style="color: green;">✓ Llegada registrada</span>' : 
-              '<button class="condo-visitor-btn log-arrival-btn" data-visitor-id="' + visitor.id + '">Registrar Llegada</button>';
-            
-            var row = '<tr>' +
-              '<td>' + visitor.first_name + ' ' + visitor.last_name + '</td>' +
-              '<td>' + visitor.id_card + '</td>' +
-              '<td>' + visitor.owner_name + '</td>' +
-              '<td>' + (visitor.visit_type === 'unique' ? 'Única' : 'Frecuente') + '</td>' +
-              '<td>' + visitDate + '</td>' +
-              '<td>' + entryType + '</td>' +
-              '<td>' + vehiclePlate + '</td>' +
-              '<td>' + actionButton + '</td>' +
-              '</tr>';
-            tbody.append(row);
-          });
+          // Aplicar paginación
+          const paginatedVisitors = updatePaginationControls(
+            response.visitors, 
+            todaysVisitorsPage, 
+            'todays-visitors-pagination', 
+            'todays-prev', 
+            'todays-next', 
+            'todays-page-info'
+          );
+          
+          // Renderizar tabla con datos paginados
+          renderTodaysVisitorsTable(paginatedVisitors);
         } else {
-          tbody.append('<tr><td colspan="8" style="text-align:center;">No hay visitantes de hoy.</td></tr>');
+          $('#todays-visitors tbody').html('<tr><td colspan="8" style="text-align: center;">No hay visitantes para hoy</td></tr>');
+          $('#todays-visitors-pagination').hide();
         }
       },
       error: function() {
@@ -330,29 +332,22 @@ jQuery(document).ready(function($) {
       url: condo_visitor_ajax.api_url + '/history/date/' + encodeURIComponent(date),
       method: 'GET',
       success: function(response) {
-        var tbody = $('#visit-history tbody');
-        tbody.empty();
         if (response.visitors && response.visitors.length > 0) {
-          response.visitors.forEach(function(visit) {
-            var visitDate = visit.visit_date || 'Frecuente';
-            var arrivalTime = visit.arrival_datetime || 'No registrada';
-            var entryType = visit.log_visit_type ? (visit.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
-            var vehiclePlate = visit.vehicle_plate || '-';
-            
-            var row = '<tr>' +
-              '<td>' + visit.first_name + ' ' + visit.last_name + '</td>' +
-              '<td>' + visit.id_card + '</td>' +
-              '<td>' + visit.owner_name + '</td>' +
-              '<td>' + (visit.visit_type === 'unique' ? 'Única' : 'Frecuente') + '</td>' +
-              '<td>' + visitDate + '</td>' +
-              '<td>' + entryType + '</td>' +
-              '<td>' + vehiclePlate + '</td>' +
-              '<td>' + arrivalTime + '</td>' +
-              '</tr>';
-            tbody.append(row);
-          });
+          // Aplicar paginación
+          const paginatedVisitors = updatePaginationControls(
+            response.visitors, 
+            visitHistoryPage, 
+            'visit-history-pagination', 
+            'history-prev', 
+            'history-next', 
+            'history-page-info'
+          );
+          
+          // Renderizar tabla con datos paginados
+          renderVisitHistoryTable(paginatedVisitors);
         } else {
-          tbody.append('<tr><td colspan="8" style="text-align:center;">No hay historial de visitas para esta fecha.</td></tr>');
+          $('#visit-history tbody').html('<tr><td colspan="8" style="text-align: center;">No hay historial de visitas para esta fecha</td></tr>');
+          $('#visit-history-pagination').hide();
         }
       },
       error: function() {
@@ -379,6 +374,7 @@ jQuery(document).ready(function($) {
   // Filtrar historial de visitas por fecha
   $('#filter-history-btn').click(function(e) {
     e.preventDefault();
+    visitHistoryPage = 1; // Reiniciar página al cambiar fecha
     var selectedDate = $('#history-date-filter').val();
     loadVisitHistory(selectedDate);
   });
