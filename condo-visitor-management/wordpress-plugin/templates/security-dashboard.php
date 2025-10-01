@@ -78,6 +78,13 @@
                     </tr>
                 </tbody>
             </table>
+            
+            <!-- Paginación para Visitantes de Hoy -->
+            <div id="todays-visitors-pagination" class="condo-visitor-pagination" style="display: none;">
+                <button id="todays-prev" class="condo-visitor-btn condo-visitor-btn-secondary" disabled>Anterior</button>
+                <span id="todays-page-info">Página 1 de 1</span>
+                <button id="todays-next" class="condo-visitor-btn condo-visitor-btn-secondary" disabled>Siguiente</button>
+            </div>
         </div>
     </div>
     
@@ -110,16 +117,20 @@
                     </tr>
                 </tbody>
             </table>
+            
+            <!-- Paginación para Historial de Visitas -->
+            <div id="visit-history-pagination" class="condo-visitor-pagination" style="display: none;">
+                <button id="history-prev" class="condo-visitor-btn condo-visitor-btn-secondary" disabled>Anterior</button>
+                <span id="history-page-info">Página 1 de 1</span>
+                <button id="history-next" class="condo-visitor-btn condo-visitor-btn-secondary" disabled>Siguiente</button>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="condo-visitor-container">
-    <h2>Dashboard de Seguridad</h2>
-    
-    <!-- Validación de Visitantes -->
-    <div class="condo-visitor-section">
-        <h3>Validar Visitante</h3>
+<!-- Validación de Visitantes -->
+<div class="condo-visitor-section">
+    <h3>Validar Visitante</h3>
         
         <div class="condo-visitor-form">
             <form id="visitor-validation-form">
@@ -226,6 +237,11 @@ jQuery(document).ready(function($) {
   console.log('Modal encontrado:', $('#create-visit-modal').length);
   console.log('Botón encontrado:', $('#open-create-visit-modal').length);
   
+  // Variables de paginación
+  let todaysVisitorsPage = 1;
+  let visitHistoryPage = 1;
+  const itemsPerPage = 20;
+  
   // Función para mostrar mensajes
   function showMessage(message, type) {
     // Crear elemento de mensaje
@@ -240,6 +256,75 @@ jQuery(document).ready(function($) {
         messageDiv.remove();
       });
     }, 5000);
+  }
+  
+  // Funciones de paginación
+  function updatePaginationControls(data, page, containerId, prevBtnId, nextBtnId, pageInfoId) {
+    const totalPages = Math.ceil(data.length / itemsPerPage);
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, data.length);
+    
+    // Mostrar/ocultar controles de paginación
+    if (data.length > itemsPerPage) {
+      $('#' + containerId).show();
+    } else {
+      $('#' + containerId).hide();
+    }
+    
+    // Actualizar botones
+    $('#' + prevBtnId).prop('disabled', page === 1);
+    $('#' + nextBtnId).prop('disabled', page === totalPages);
+    
+    // Actualizar información de página
+    $('#' + pageInfoId).text(`Página ${page} de ${totalPages}`);
+    
+    return data.slice(startIndex, endIndex);
+  }
+  
+  function renderTodaysVisitorsTable(visitors) {
+    const tbody = $('#todays-visitors tbody');
+    tbody.empty();
+    
+    if (visitors.length === 0) {
+      tbody.append('<tr><td colspan="8" style="text-align: center;">No hay visitantes para hoy</td></tr>');
+      return;
+    }
+    
+    visitors.forEach(function(visitor) {
+      const row = $('<tr></tr>');
+      row.append('<td>' + visitor.first_name + ' ' + visitor.last_name + '</td>');
+      row.append('<td>' + visitor.id_card + '</td>');
+      row.append('<td>' + visitor.owner_name + '</td>');
+      row.append('<td>' + (visitor.visit_type === 'unique' ? 'Única' : 'Frecuente') + '</td>');
+      row.append('<td>' + visitor.visit_date + '</td>');
+      row.append('<td>' + (visitor.log_visit_type || 'N/A') + '</td>');
+      row.append('<td>' + (visitor.vehicle_plate || 'N/A') + '</td>');
+      row.append('<td><button class="condo-visitor-btn log-arrival-btn" data-visitor-id="' + visitor.id + '">Registrar Llegada</button></td>');
+      tbody.append(row);
+    });
+  }
+  
+  function renderVisitHistoryTable(visitors) {
+    const tbody = $('#visit-history tbody');
+    tbody.empty();
+    
+    if (visitors.length === 0) {
+      tbody.append('<tr><td colspan="8" style="text-align: center;">No hay visitas para esta fecha</td></tr>');
+      return;
+    }
+    
+    visitors.forEach(function(visitor) {
+      const row = $('<tr></tr>');
+      row.append('<td>' + visitor.first_name + ' ' + visitor.last_name + '</td>');
+      row.append('<td>' + visitor.id_card + '</td>');
+      row.append('<td>' + visitor.owner_name + '</td>');
+      row.append('<td>' + (visitor.visit_type === 'unique' ? 'Única' : 'Frecuente') + '</td>');
+      row.append('<td>' + visitor.visit_date + '</td>');
+      row.append('<td>' + (visitor.log_visit_type || 'N/A') + '</td>');
+      row.append('<td>' + (visitor.vehicle_plate || 'N/A') + '</td>');
+      row.append('<td>' + (visitor.arrival_datetime || 'N/A') + '</td>');
+      tbody.append(row);
+    });
   }
   
   // Función para cargar visitantes de hoy
