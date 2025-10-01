@@ -55,7 +55,7 @@ jQuery(document).ready(function($) {
             data: JSON.stringify(formData),
             success: function(response) {
                 showMessage('Visitante registrado exitosamente', 'success');
-                form[0].reset();
+                form.get(0).reset();
                 // Establecer fecha por defecto a hoy después del reset
                 document.getElementById('unique_visit_date').valueAsDate = new Date();
             },
@@ -109,7 +109,7 @@ jQuery(document).ready(function($) {
             data: JSON.stringify(formData),
             success: function(response) {
                 showMessage('Visitante frecuente registrado exitosamente', 'success');
-                form[0].reset();
+                form.get(0).reset();
                 $('#other-description-field').hide();
                 // Disparar evento para recargar la lista de visitantes frecuentes
                 $(document).trigger('visitor-registered');
