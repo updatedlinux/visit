@@ -128,52 +128,6 @@
     </div>
 </div>
 
-<!-- Validación de Visitantes -->
-<div class="condo-visitor-section">
-    <h3>Validar Visitante</h3>
-        
-        <div class="condo-visitor-form">
-            <form id="visitor-validation-form">
-                <div class="condo-visitor-search-container">
-                    <input type="text" id="id_card_search" placeholder="Ingrese número de cédula" required>
-                    <button type="submit" class="condo-visitor-btn">Buscar</button>
-                </div>
-            </form>
-            
-            <div id="validation-result">
-                <!-- Los resultados de validación se mostrarán aquí -->
-            </div>
-            
-            <!-- Formulario de registro de llegada (oculto inicialmente) -->
-            <div id="arrival-registration-form" style="display: none;">
-                <h4>Registrar Llegada</h4>
-                <form id="arrival-form">
-                    <div class="condo-visitor-form-group">
-                        <label>
-                            <input type="radio" name="visit_type" value="pedestrian" checked>
-                            Peatonal
-                        </label>
-                        <label>
-                            <input type="radio" name="visit_type" value="vehicle">
-                            Con Vehículo
-                        </label>
-                    </div>
-                    
-                    <div id="vehicle-plate-field" style="display: none;">
-                        <div class="condo-visitor-form-group">
-                            <label for="vehicle_plate">Placa del Vehículo</label>
-                            <input type="text" id="vehicle_plate" name="vehicle_plate" placeholder="Ej: ABC-123" maxlength="20">
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="condo-visitor-btn" id="register-arrival-btn" disabled>
-                        Registrar Llegada
-                    </button>
-                </form>
-            </div>
-    </div>
-</div>
-
 <!-- Modal para Creación de Anuncio de Visita Única -->
 <div id="create-visit-modal" class="condo-visitor-modal">
     <div class="condo-visitor-modal-content">
@@ -712,6 +666,34 @@ jQuery(document).ready(function($) {
         submitBtn.prop('disabled', false).text('Crear Anuncio de Visita');
       }
     });
+  });
+  
+  // Manejadores de eventos para paginación de Visitantes de Hoy
+  $('#todays-prev').click(function() {
+    if (todaysVisitorsPage > 1) {
+      todaysVisitorsPage--;
+      loadTodaysVisitors();
+    }
+  });
+  
+  $('#todays-next').click(function() {
+    todaysVisitorsPage++;
+    loadTodaysVisitors();
+  });
+  
+  // Manejadores de eventos para paginación de Historial de Visitas
+  $('#history-prev').click(function() {
+    if (visitHistoryPage > 1) {
+      visitHistoryPage--;
+      var selectedDate = $('#history-date-filter').val();
+      loadVisitHistory(selectedDate);
+    }
+  });
+  
+  $('#history-next').click(function() {
+    visitHistoryPage++;
+    var selectedDate = $('#history-date-filter').val();
+    loadVisitHistory(selectedDate);
   });
 });
 </script>
