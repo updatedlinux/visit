@@ -178,17 +178,30 @@ jQuery(document).ready(function($) {
     $(document).on('click', '.show-arrival-form-btn', function() {
         const visitorId = $(this).data('visitor-id');
         
-        // Mostrar el formulario específico para este visitante
-        $(`#arrival-registration-form-${visitorId}`).show();
-        
-        // Resetear el formulario
-        $(`form[data-visitor-id="${visitorId}"]`)[0].reset();
-        $(`input[name="visit_type_${visitorId}"][value="pedestrian"]`).prop('checked', true);
-        $(`.vehicle-plate-field-${visitorId}`).hide();
-        $(`#vehicle_plate_${visitorId}`).prop('required', false);
-        
-        // Habilitar botón para peatonal por defecto
-        $(`.register-arrival-btn[data-visitor-id="${visitorId}"]`).prop('disabled', false);
+        // Si estamos en el dashboard de seguridad, usar el formulario estático
+        if ($('#arrival-registration-form').length > 0) {
+            $('#arrival-registration-form').data('visitor-id', visitorId);
+            $('#arrival-registration-form').show();
+            
+            // Resetear el formulario estático
+            $('#arrival-form')[0].reset();
+            $('input[name="visit_type"][value="pedestrian"]').prop('checked', true);
+            $('#vehicle-plate-field').hide();
+            $('#vehicle_plate').prop('required', false);
+            $('#register-arrival-btn').prop('disabled', false);
+        } else {
+            // Usar el formulario dinámico para otros contextos
+            $(`#arrival-registration-form-${visitorId}`).show();
+            
+            // Resetear el formulario dinámico
+            $(`form[data-visitor-id="${visitorId}"]`)[0].reset();
+            $(`input[name="visit_type_${visitorId}"][value="pedestrian"]`).prop('checked', true);
+            $(`.vehicle-plate-field-${visitorId}`).hide();
+            $(`#vehicle_plate_${visitorId}`).prop('required', false);
+            
+            // Habilitar botón para peatonal por defecto
+            $(`.register-arrival-btn[data-visitor-id="${visitorId}"]`).prop('disabled', false);
+        }
     });
     
     // Manejar cambio de tipo de visita (peatonal/vehículo)
@@ -419,7 +432,8 @@ jQuery(document).ready(function($) {
                 </button>
                 ` : ''}
                 
-                <!-- Formulario de registro de llegada integrado -->
+                <!-- Formulario de registro de llegada integrado (solo si NO estamos en dashboard de seguridad) -->
+                ${$('#arrival-registration-form').length === 0 ? `
                 <div id="arrival-registration-form-${visitor.id}" class="arrival-form-container" style="display: none; margin-top: 15px;">
                     <h4>Registrar Llegada</h4>
                     <form class="arrival-form" data-visitor-id="${visitor.id}">
@@ -446,23 +460,11 @@ jQuery(document).ready(function($) {
                         </button>
                     </form>
                 </div>
+                ` : ''}
             </div>
         `;
         
         resultContainer.html(html);
-        
-        // Si estamos en el dashboard de seguridad, mostrar el formulario estático
-        if ($('#arrival-registration-form').length > 0) {
-            $('#arrival-registration-form').data('visitor-id', visitor.id);
-            $('#arrival-registration-form').show();
-            
-            // Resetear el formulario
-            $('#arrival-form')[0].reset();
-            $('input[name="visit_type"][value="pedestrian"]').prop('checked', true);
-            $('#vehicle-plate-field').hide();
-            $('#vehicle_plate').prop('required', false);
-            $('#register-arrival-btn').prop('disabled', false); // Habilitar para peatonal por defecto
-        }
     }
     
     // Función para mostrar mensajes
