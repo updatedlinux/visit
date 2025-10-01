@@ -1,16 +1,9 @@
 <div class="condo-visitor-container">
     <h2>Dashboard de Seguridad</h2>
     
-    <!-- Pestañas de navegación -->
-    <div class="condo-visitor-tabs">
-        <button class="condo-visitor-tab-btn active" data-tab="validation">Validar Visitante</button>
-        <button class="condo-visitor-tab-btn" data-tab="create-visit">Creación de Anuncio de Visita Única</button>
-    </div>
-    
-    <!-- Pestaña: Validación de Visitantes -->
-    <div id="validation-tab" class="condo-visitor-tab-content active">
-        <div class="condo-visitor-section">
-            <h3>Validar Visitante</h3>
+    <!-- Validación de Visitantes -->
+    <div class="condo-visitor-section">
+        <h3>Validar Visitante</h3>
             
             <div class="condo-visitor-form">
                 <form id="visitor-validation-form">
@@ -563,7 +556,6 @@ jQuery(document).ready(function($) {
     
     const form = $(this);
     const submitBtn = form.find('button[type="submit"]');
-    const originalBtnText = submitBtn.text();
     
     // Validar que se haya seleccionado un propietario válido
     const wpUserId = $('#security_wp_user_id').val();
@@ -593,6 +585,7 @@ jQuery(document).ready(function($) {
       data: JSON.stringify(formData),
       success: function(response) {
         showMessage('Anuncio de visita creado exitosamente', 'success');
+        
         // Limpiar campos manualmente
         clearModalFields();
         
@@ -603,6 +596,9 @@ jQuery(document).ready(function($) {
         loadTodaysVisitors();
         var selectedDate = $('#history-date-filter').val();
         loadVisitHistory(selectedDate);
+        
+        // Rehabilitar botón inmediatamente después del éxito
+        submitBtn.prop('disabled', false).text('Crear Anuncio de Visita');
       },
       error: function(xhr) {
         let errorMessage = 'Error al crear el anuncio de visita';
@@ -610,10 +606,9 @@ jQuery(document).ready(function($) {
           errorMessage = xhr.responseJSON.error;
         }
         showMessage(errorMessage, 'error');
-      },
-      complete: function() {
-        // Rehabilitar botón
-        submitBtn.prop('disabled', false).text(originalBtnText);
+        
+        // Rehabilitar botón en caso de error
+        submitBtn.prop('disabled', false).text('Crear Anuncio de Visita');
       }
     });
   });
