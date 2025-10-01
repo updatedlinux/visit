@@ -207,10 +207,11 @@
                 
                 <div class="condo-visitor-form-group">
                     <label for="security_propietario">Propietario que Anuncia:</label>
-                    <select id="security_propietario" name="wp_user_id" required>
-                        <option value="">Seleccione el propietario</option>
-                        <!-- Las opciones se cargarán dinámicamente -->
-                    </select>
+                    <div class="condo-visitor-autocomplete-container">
+                        <input type="text" id="security_propietario" name="propietario_search" placeholder="Escriba el nombre o email del propietario..." required>
+                        <input type="hidden" id="security_wp_user_id" name="wp_user_id" required>
+                        <div id="propietario-suggestions" class="condo-visitor-suggestions"></div>
+                    </div>
                 </div>
                 
                 <div class="condo-visitor-modal-footer">
@@ -433,7 +434,8 @@ jQuery(document).ready(function($) {
     console.log('Modal antes de mostrar:', $('#create-visit-modal').hasClass('show'));
     $('#create-visit-modal').addClass('show');
     console.log('Modal después de mostrar:', $('#create-visit-modal').hasClass('show'));
-    loadPropietarios();
+    // Limpiar campos del modal
+    clearModalFields();
   });
   
   // Manejar cierre del modal
@@ -456,33 +458,101 @@ jQuery(document).ready(function($) {
     }
   });
   
-  // Cargar lista de propietarios
-  function loadPropietarios() {
-    console.log('Iniciando carga de propietarios...');
+  // Limpiar campos del modal
+  function clearModalFields() {
+    $('#security_first_name').val('');
+    $('#security_last_name').val('');
+    $('#security_id_card').val('');
+    $('#security_visit_date').val(new Date().toISOString().split('T')[0]);
+    $('#security_propietario').val('');
+    $('#security_wp_user_id').val('');
+    $('#propietario-suggestions').empty();
+  }
+  
+  // Búsqueda dinámica de propietarios
+  let searchTimeout;
+  $('#security_propietario').on('input', function() {
+    const query = $(this).val().trim();
+    const suggestionsContainer = $('#propietario-suggestions');
+    
+    // Limpiar timeout anterior
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+      suggestionsContainer.empty();
+      $('#security_wp_user_id').val('');
+      return;
+    }
+    
+    // Debounce la búsqueda
+    searchTimeout = setTimeout(function() {
+      searchPropietarios(query);
+    }, 300);
+  });
+  
+  // Función para buscar propietarios
+  function searchPropietarios(query) {
+    console.log('Buscando propietarios con query:', query);
+    
     $.ajax({
       url: condo_visitor_ajax.api_url + '/users',
       method: 'GET',
       success: function(response) {
         console.log('Respuesta de usuarios:', response);
-        const select = $('#security_propietario');
-        select.empty();
-        select.append('<option value="">Seleccione el propietario</option>');
+        const suggestionsContainer = $('#propietario-suggestions');
+        suggestionsContainer.empty();
         
         if (response.users && response.users.length > 0) {
-          response.users.forEach(function(user) {
-            select.append('<option value="' + user.ID + '">' + user.display_name + ' (' + user.user_email + ')</option>');
+          // Filtrar usuarios que coincidan con la búsqueda
+          const filteredUsers = response.users.filter(function(user) {
+            const name = user.display_name.toLowerCase();
+            const email = user.user_email.toLowerCase();
+            const searchTerm = query.toLowerCase();
+            
+            return name.includes(searchTerm) || email.includes(searchTerm);
           });
-          console.log('Propietarios cargados:', response.users.length);
+          
+          if (filteredUsers.length > 0) {
+            filteredUsers.forEach(function(user) {
+              const suggestionItem = $('<div class="condo-visitor-suggestion-item" data-user-id="' + user.ID + '">' +
+                '<strong>' + user.display_name + '</strong><br>' +
+                '<small>' + user.user_email + '</small>' +
+                '</div>');
+              
+              suggestionItem.click(function() {
+                selectPropietario(user);
+              });
+              
+              suggestionsContainer.append(suggestionItem);
+            });
+          } else {
+            suggestionsContainer.html('<div class="condo-visitor-no-results">No se encontraron propietarios</div>');
+          }
         } else {
-          console.log('No se encontraron usuarios');
+          suggestionsContainer.html('<div class="condo-visitor-no-results">No se encontraron usuarios</div>');
         }
       },
       error: function() {
-        console.error('Error al cargar propietarios');
-        $('#security_propietario').html('<option value="">Error al cargar propietarios</option>');
+        console.error('Error al buscar propietarios');
+        $('#propietario-suggestions').html('<div class="condo-visitor-error">Error al buscar propietarios</div>');
       }
     });
   }
+  
+  // Seleccionar propietario
+  function selectPropietario(user) {
+    $('#security_propietario').val(user.display_name + ' (' + user.user_email + ')');
+    $('#security_wp_user_id').val(user.ID);
+    $('#propietario-suggestions').empty();
+    console.log('Propietario seleccionado:', user);
+  }
+  
+  // Ocultar sugerencias al hacer click fuera
+  $(document).click(function(event) {
+    if (!$(event.target).closest('.condo-visitor-autocomplete-container').length) {
+      $('#propietario-suggestions').empty();
+    }
+  });
   
   // Establecer fecha por defecto a hoy
   $('#security_visit_date').val(new Date().toISOString().split('T')[0]);
@@ -495,12 +565,19 @@ jQuery(document).ready(function($) {
     const submitBtn = form.find('button[type="submit"]');
     const originalBtnText = submitBtn.text();
     
+    // Validar que se haya seleccionado un propietario válido
+    const wpUserId = $('#security_wp_user_id').val();
+    if (!wpUserId || wpUserId === '') {
+      showMessage('Debe seleccionar un propietario válido de la lista', 'error');
+      return;
+    }
+    
     // Deshabilitar botón y mostrar carga
     submitBtn.prop('disabled', true).text('Creando...');
     
     // Obtener datos del formulario
     const formData = {
-      wp_user_id: form.find('select[name="wp_user_id"]').val(),
+      wp_user_id: wpUserId,
       first_name: form.find('input[name="first_name"]').val(),
       last_name: form.find('input[name="last_name"]').val(),
       id_card: form.find('input[name="id_card"]').val(),
@@ -517,11 +594,7 @@ jQuery(document).ready(function($) {
       success: function(response) {
         showMessage('Anuncio de visita creado exitosamente', 'success');
         // Limpiar campos manualmente
-        form.find('input[type="text"]').val('');
-        form.find('input[type="date"]').val('');
-        form.find('select').prop('selectedIndex', 0);
-        // Establecer fecha por defecto a hoy
-        $('#security_visit_date').val(new Date().toISOString().split('T')[0]);
+        clearModalFields();
         
         // Cerrar modal
         $('#create-visit-modal').removeClass('show');

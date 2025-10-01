@@ -602,3 +602,72 @@
     padding: 12px 15px;
   }
 }
+
+/* Estilos para autocompletado */
+.condo-visitor-autocomplete-container {
+  position: relative;
+  width: 100%;
+}
+
+.condo-visitor-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.condo-visitor-suggestion-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.condo-visitor-suggestion-item:hover {
+  background-color: #f8f9fa;
+}
+
+.condo-visitor-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.condo-visitor-suggestion-item strong {
+  color: #333;
+  font-size: 14px;
+}
+
+.condo-visitor-suggestion-item small {
+  color: #666;
+  font-size: 12px;
+}
+
+.condo-visitor-no-results,
+.condo-visitor-error {
+  padding: 12px 15px;
+  color: #666;
+  font-style: italic;
+  text-align: center;
+}
+
+.condo-visitor-error {
+  color: #dc3545;
+}
+
+/* Responsive para autocompletado */
+@media (max-width: 768px) {
+  .condo-visitor-suggestions {
+    max-height: 150px;
+  }
+  
+  .condo-visitor-suggestion-item {
+    padding: 10px 12px;
+  }
+}
