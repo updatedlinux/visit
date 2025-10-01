@@ -300,10 +300,13 @@ async function getUsersController(req, res) {
   try {
     const db = require('../config/database');
     const query = `
-      SELECT ID, display_name, user_email 
-      FROM wp_users 
-      WHERE user_status = 0 
-      ORDER BY display_name ASC
+      SELECT u.ID, u.display_name, u.user_email 
+      FROM wp_users u
+      INNER JOIN wp_usermeta um ON u.ID = um.user_id
+      WHERE u.user_status = 0 
+        AND um.meta_key = 'wp_capabilities'
+        AND um.meta_value LIKE '%subscriber%'
+      ORDER BY u.display_name ASC
     `;
     
     const [rows] = await db.execute(query);
