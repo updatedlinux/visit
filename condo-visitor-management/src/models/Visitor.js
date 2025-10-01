@@ -99,13 +99,24 @@ function validateVisitor(id_card) {
 }
 
 // Registrar llegada de visitante
-function logVisitorArrival(visitor_id) {
+function logVisitorArrival(visitor_id, visit_type = 'pedestrian', vehicle_plate = null) {
   const venezuelaTime = getCurrentVenezuelaDateForStorage();
+  
+  // Validar que si es vehículo, debe tener placa
+  if (visit_type === 'vehicle' && (!vehicle_plate || vehicle_plate.trim() === '')) {
+    throw new Error('Se requiere placa del vehículo para visitas tipo vehicle');
+  }
+  
+  // Si es peatonal, asegurar que no tenga placa
+  if (visit_type === 'pedestrian') {
+    vehicle_plate = null;
+  }
+  
   const query = `
-    INSERT INTO condo360_visit_logs (visitor_id, arrival_datetime)
-    VALUES (?, ?)
+    INSERT INTO condo360_visit_logs (visitor_id, arrival_datetime, visit_type, vehicle_plate)
+    VALUES (?, ?, ?, ?)
   `;
-  return db.execute(query, [visitor_id, venezuelaTime]);
+  return db.execute(query, [visitor_id, venezuelaTime, visit_type, vehicle_plate]);
 }
 
 // Obtener visitantes de hoy (solo visitas únicas)
@@ -119,7 +130,9 @@ function getTodaysVisitors() {
       v.*, 
       u.display_name as owner_name,
       vl.arrival_datetime,
-      vl.id as log_id
+      vl.id as log_id,
+      vl.visit_type as log_visit_type,
+      vl.vehicle_plate
     FROM condo360_visitors v
     JOIN wp_users u ON v.wp_user_id = u.ID
     LEFT JOIN condo360_visit_logs vl ON v.id = vl.visitor_id 
@@ -141,7 +154,9 @@ function getVisitorsByDate(date) {
       v.*, 
       u.display_name as owner_name,
       vl.arrival_datetime,
-      vl.id as log_id
+      vl.id as log_id,
+      vl.visit_type as log_visit_type,
+      vl.vehicle_plate
     FROM condo360_visitors v
     JOIN wp_users u ON v.wp_user_id = u.ID
     LEFT JOIN condo360_visit_logs vl ON v.id = vl.visitor_id 

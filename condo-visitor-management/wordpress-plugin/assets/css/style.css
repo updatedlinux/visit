@@ -329,3 +329,59 @@
   border-radius: 4px;
   margin: 10px 0;
 }
+
+/* Estilos para el formulario de registro de llegada */
+#arrival-registration-form {
+  background: #f8f9fa;
+  border: 1px solid #e1e1e1;
+  border-radius: 5px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+#arrival-registration-form h4 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+#arrival-registration-form .condo-visitor-form-group {
+  margin-bottom: 15px;
+}
+
+#arrival-registration-form label {
+  display: inline-block;
+  margin-right: 20px;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+#arrival-registration-form input[type="radio"] {
+  margin-right: 5px;
+}
+
+#vehicle-plate-field {
+  margin-top: 10px;
+}
+
+#vehicle-plate-field input {
+  text-transform: uppercase;
+}
+
+/* Estilos para las tablas con información de vehículos */
+.condo-visitor-table th,
+.condo-visitor-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.condo-visitor-table th:nth-child(1),
+.condo-visitor-table td:nth-child(1) {
+  text-align: left;
+}
+
+.condo-visitor-table th:nth-child(3),
+.condo-visitor-table td:nth-child(3) {
+  text-align: left;
+}

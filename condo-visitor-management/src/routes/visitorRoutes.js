@@ -226,11 +226,38 @@ router.get('/validate/:id_card', visitorController.validateVisitorController);
  *         schema:
  *           type: integer
  *         description: ID del visitante
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               visit_type:
+ *                 type: string
+ *                 enum: ["pedestrian", "vehicle"]
+ *                 default: "pedestrian"
+ *                 description: Tipo de visita (peatonal o vehículo)
+ *               vehicle_plate:
+ *                 type: string
+ *                 description: Placa del vehículo (requerido si visit_type es "vehicle")
+ *                 example: "ABC-123"
  *     responses:
  *       201:
  *         description: Llegada de visitante registrada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 visit_type:
+ *                   type: string
+ *                 vehicle_plate:
+ *                   type: string
  *       400:
- *         description: Falta ID del visitante
+ *         description: Falta ID del visitante o datos inválidos
  *       500:
  *         description: Error interno del servidor
  */

@@ -168,6 +168,23 @@ jQuery(document).ready(function($) {
         });
     });
     
+    // Manejar mostrar formulario de registro de llegada
+    $(document).on('click', '.show-arrival-form-btn', function() {
+        const visitorId = $(this).data('visitor-id');
+        
+        // Configurar el formulario con el ID del visitante
+        $('#arrival-form').data('visitor-id', visitorId);
+        
+        // Mostrar el formulario
+        $('#arrival-registration-form').show();
+        
+        // Resetear el formulario
+        $('#arrival-form')[0].reset();
+        $('input[name="visit_type"][value="pedestrian"]').prop('checked', true);
+        $('#vehicle-plate-field').hide();
+        $('#vehicle_plate').prop('required', false);
+    });
+    
     // Manejar registro de llegada de visitante
     $(document).on('click', '.log-arrival-btn', function() {
         const visitorId = $(this).data('visitor-id');
@@ -296,7 +313,7 @@ jQuery(document).ready(function($) {
                     ` : ''}
                 </div>
                 ${visitor.visit_type === 'unique' || visitor.active ? `
-                <button class="condo-visitor-btn log-arrival-btn" data-visitor-id="${visitor.id}">
+                <button class="condo-visitor-btn show-arrival-form-btn" data-visitor-id="${visitor.id}">
                     Registrar llegada
                 </button>
                 ` : ''}

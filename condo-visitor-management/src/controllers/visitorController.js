@@ -17,7 +17,9 @@ function formatVisitorsWithTimezone(visitors) {
     ...visitor,
     visit_date: visitor.visit_date ? formatDateForDisplay(visitor.visit_date) : null,
     arrival_datetime: visitor.arrival_datetime ? formatForDisplay(visitor.arrival_datetime) : null,
-    created_at: formatForDisplay(visitor.created_at)
+    created_at: formatForDisplay(visitor.created_at),
+    log_visit_type: visitor.log_visit_type || null,
+    vehicle_plate: visitor.vehicle_plate || null
   }));
 }
 
@@ -192,20 +194,39 @@ const validateVisitorController = async (req, res) => {
 const logVisitorArrivalController = async (req, res) => {
   try {
     const { visitor_id } = req.params;
+    const { visit_type = 'pedestrian', vehicle_plate = null } = req.body;
     
     if (!visitor_id) {
       return res.status(400).json({ error: 'Falta ID del visitante' });
     }
     
-    const result = await logVisitorArrival(visitor_id);
+    // Validar tipo de visita
+    if (visit_type !== 'pedestrian' && visit_type !== 'vehicle') {
+      return res.status(400).json({ error: 'Tipo de visita inválido. Use "pedestrian" o "vehicle"' });
+    }
+    
+    // Validar placa si es vehículo
+    if (visit_type === 'vehicle' && (!vehicle_plate || vehicle_plate.trim() === '')) {
+      return res.status(400).json({ error: 'Se requiere placa del vehículo para visitas tipo vehicle' });
+    }
+    
+    const result = await logVisitorArrival(visitor_id, visit_type, vehicle_plate);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Visitante no encontrado' });
     }
     
-    res.status(201).json({ message: 'Llegada de visitante registrada exitosamente' });
+    res.status(201).json({ 
+      message: 'Llegada de visitante registrada exitosamente',
+      visit_type: visit_type,
+      vehicle_plate: vehicle_plate
+    });
   } catch (error) {
     console.error('Error al registrar llegada de visitante:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    if (error.message.includes('Se requiere placa del vehículo')) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
   }
 };
 
