@@ -295,6 +295,25 @@ async function getFrequentVisitorsByUserController(req, res) {
   }
 }
 
+// Obtener lista de usuarios/propietarios
+async function getUsersController(req, res) {
+  try {
+    const db = require('../config/database');
+    const query = `
+      SELECT ID, display_name, user_email 
+      FROM wp_users 
+      WHERE user_status = 0 
+      ORDER BY display_name ASC
+    `;
+    
+    const [rows] = await db.execute(query);
+    res.status(200).json({ users: rows });
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+}
+
 module.exports = {
   createUniqueVisitorController,
   createFrequentVisitorController,
@@ -306,5 +325,6 @@ module.exports = {
   getTodaysVisitorsController,
   getVisitorsByDateController,
   getFrequentVisitorsByUserController,
-  getVisitHistoryByDateController
+  getVisitHistoryByDateController,
+  getUsersController
 };

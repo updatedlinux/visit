@@ -437,3 +437,52 @@
   background-color: #6c757d;
   border-color: #6c757d;
 }
+
+/* Estilos para pestañas */
+.condo-visitor-tabs {
+  display: flex;
+  border-bottom: 2px solid #e1e1e1;
+  margin-bottom: 20px;
+}
+
+.condo-visitor-tab-btn {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.condo-visitor-tab-btn:hover {
+  color: #007cba;
+  background-color: #f8f9fa;
+}
+
+.condo-visitor-tab-btn.active {
+  color: #007cba;
+  border-bottom-color: #007cba;
+  background-color: #f8f9fa;
+}
+
+.condo-visitor-tab-content {
+  display: none;
+}
+
+.condo-visitor-tab-content.active {
+  display: block;
+}
+
+/* Estilos para descripción */
+.condo-visitor-description {
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+  color: #1565c0;
+  font-style: italic;
+}

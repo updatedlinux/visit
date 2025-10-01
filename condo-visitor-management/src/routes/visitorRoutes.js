@@ -356,7 +356,7 @@ router.get('/debug/time', (req, res) => {
   const moment = require('moment-timezone');
   const now = new Date();
   const venezuelaTime = moment().tz('America/Caracas');
-  
+
   res.json({
     utc_time: now.toISOString(),
     venezuela_time: venezuelaTime.format('DD/MM/YYYY hh:mm:ss A'),
@@ -364,5 +364,35 @@ router.get('/debug/time', (req, res) => {
     timezone_offset: venezuelaTime.format('Z')
   });
 });
+
+/**
+ * @swagger
+ * /visit/users:
+ *   get:
+ *     tags: [Visitantes]
+ *     summary: Obtener lista de usuarios/propietarios
+ *     responses:
+ *       200:
+ *         description: Lista de usuarios recuperada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       ID:
+ *                         type: integer
+ *                       display_name:
+ *                         type: string
+ *                       user_email:
+ *                         type: string
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/users', visitorController.getUsersController);
 
 module.exports = router;
