@@ -385,3 +385,42 @@
 .condo-visitor-table td:nth-child(3) {
   text-align: left;
 }
+
+/* Estilos para formularios de llegada integrados */
+.arrival-form-container {
+  background: #f8f9fa;
+  border: 1px solid #e1e1e1;
+  border-radius: 5px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.arrival-form-container h4 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.arrival-form-container .condo-visitor-form-group {
+  margin-bottom: 15px;
+}
+
+.arrival-form-container label {
+  display: inline-block;
+  margin-right: 20px;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.arrival-form-container input[type="radio"] {
+  margin-right: 5px;
+}
+
+.arrival-form-container .vehicle-plate-field-* {
+  margin-top: 10px;
+}
+
+.arrival-form-container input[type="text"] {
+  text-transform: uppercase;
+}

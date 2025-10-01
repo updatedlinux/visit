@@ -56,6 +56,8 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 showMessage('Visitante registrado exitosamente', 'success');
                 form[0].reset();
+                // Establecer fecha por defecto a hoy después del reset
+                document.getElementById('unique_visit_date').valueAsDate = new Date();
             },
             error: function(xhr) {
                 let errorMessage = 'Error al registrar el visitante';
@@ -65,8 +67,10 @@ jQuery(document).ready(function($) {
                 showMessage(errorMessage, 'error');
             },
             complete: function() {
-                // Rehabilitar botón de envío
-                submitBtn.prop('disabled', false).text(originalBtnText);
+                // Rehabilitar botón de envío - usar setTimeout para asegurar que se ejecute
+                setTimeout(function() {
+                    submitBtn.prop('disabled', false).text(originalBtnText);
+                }, 100);
             }
         });
     });
@@ -118,8 +122,10 @@ jQuery(document).ready(function($) {
                 showMessage(errorMessage, 'error');
             },
             complete: function() {
-                // Rehabilitar botón de envío
-                submitBtn.prop('disabled', false).text(originalBtnText);
+                // Rehabilitar botón de envío - usar setTimeout para asegurar que se ejecute
+                setTimeout(function() {
+                    submitBtn.prop('disabled', false).text(originalBtnText);
+                }, 100);
             }
         });
     });
@@ -172,17 +178,92 @@ jQuery(document).ready(function($) {
     $(document).on('click', '.show-arrival-form-btn', function() {
         const visitorId = $(this).data('visitor-id');
         
-        // Configurar el formulario con el ID del visitante
-        $('#arrival-form').data('visitor-id', visitorId);
-        
-        // Mostrar el formulario
-        $('#arrival-registration-form').show();
+        // Mostrar el formulario específico para este visitante
+        $(`#arrival-registration-form-${visitorId}`).show();
         
         // Resetear el formulario
-        $('#arrival-form')[0].reset();
-        $('input[name="visit_type"][value="pedestrian"]').prop('checked', true);
-        $('#vehicle-plate-field').hide();
-        $('#vehicle_plate').prop('required', false);
+        $(`form[data-visitor-id="${visitorId}"]`)[0].reset();
+        $(`input[name="visit_type_${visitorId}"][value="pedestrian"]`).prop('checked', true);
+        $(`.vehicle-plate-field-${visitorId}`).hide();
+        $(`#vehicle_plate_${visitorId}`).prop('required', false);
+    });
+    
+    // Manejar cambio de tipo de visita (peatonal/vehículo)
+    $(document).on('change', 'input[name^="visit_type_"]', function() {
+        const visitorId = $(this).attr('name').split('_')[2];
+        
+        if ($(this).val() === 'vehicle') {
+            $(`.vehicle-plate-field-${visitorId}`).show();
+            $(`#vehicle_plate_${visitorId}`).prop('required', true);
+        } else {
+            $(`.vehicle-plate-field-${visitorId}`).hide();
+            $(`#vehicle_plate_${visitorId}`).prop('required', false).val('');
+        }
+    });
+    
+    // Manejar envío del formulario de registro de llegada
+    $(document).on('submit', '.arrival-form', function(e) {
+        e.preventDefault();
+        
+        const visitorId = $(this).data('visitor-id');
+        const visitType = $(`input[name="visit_type_${visitorId}"]:checked`).val();
+        const vehiclePlate = $(`#vehicle_plate_${visitorId}`).val().trim();
+        const submitBtn = $(`.register-arrival-btn[data-visitor-id="${visitorId}"]`);
+        const originalBtnText = submitBtn.text();
+        
+        // Validar placa si es vehículo
+        if (visitType === 'vehicle' && !vehiclePlate) {
+            alert('Por favor ingrese la placa del vehículo');
+            return;
+        }
+        
+        // Deshabilitar botón y mostrar carga
+        submitBtn.prop('disabled', true).text('Registrando...');
+        
+        // Preparar datos
+        const requestData = {
+            visit_type: visitType
+        };
+        
+        if (visitType === 'vehicle') {
+            requestData.vehicle_plate = vehiclePlate;
+        }
+        
+        // Enviar solicitud AJAX
+        $.ajax({
+            url: condo_visitor_ajax.api_url + '/log/' + visitorId,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(requestData),
+            success: function(response) {
+                showMessage('Llegada registrada exitosamente', 'success');
+                
+                // Ocultar formulario y limpiar
+                $(`#arrival-registration-form-${visitorId}`).hide();
+                $('#validation-result').empty();
+                $('#id_card_search').val('');
+                
+                // Recargar las tablas si existen
+                if (typeof loadTodaysVisitors === 'function') {
+                    loadTodaysVisitors();
+                }
+                if (typeof loadVisitHistory === 'function') {
+                    var selectedDate = $('#history-date-filter').val();
+                    loadVisitHistory(selectedDate);
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Error al registrar la llegada';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                showMessage(errorMessage, 'error');
+            },
+            complete: function() {
+                // Rehabilitar botón
+                submitBtn.prop('disabled', false).text(originalBtnText);
+            }
+        });
     });
     
     // Manejar registro de llegada de visitante
@@ -317,6 +398,34 @@ jQuery(document).ready(function($) {
                     Registrar llegada
                 </button>
                 ` : ''}
+                
+                <!-- Formulario de registro de llegada integrado -->
+                <div id="arrival-registration-form-${visitor.id}" class="arrival-form-container" style="display: none; margin-top: 15px;">
+                    <h4>Registrar Llegada</h4>
+                    <form class="arrival-form" data-visitor-id="${visitor.id}">
+                        <div class="condo-visitor-form-group">
+                            <label>
+                                <input type="radio" name="visit_type_${visitor.id}" value="pedestrian" checked>
+                                Peatonal
+                            </label>
+                            <label>
+                                <input type="radio" name="visit_type_${visitor.id}" value="vehicle">
+                                Con Vehículo
+                            </label>
+                        </div>
+                        
+                        <div class="vehicle-plate-field-${visitor.id}" style="display: none;">
+                            <div class="condo-visitor-form-group">
+                                <label for="vehicle_plate_${visitor.id}">Placa del Vehículo</label>
+                                <input type="text" id="vehicle_plate_${visitor.id}" name="vehicle_plate_${visitor.id}" placeholder="Ej: ABC-123" maxlength="20">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="condo-visitor-btn register-arrival-btn" data-visitor-id="${visitor.id}">
+                            Registrar Llegada
+                        </button>
+                    </form>
+                </div>
             </div>
         `;
         
