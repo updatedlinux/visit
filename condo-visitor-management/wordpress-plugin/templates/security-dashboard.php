@@ -226,6 +226,22 @@ jQuery(document).ready(function($) {
   console.log('Modal encontrado:', $('#create-visit-modal').length);
   console.log('Botón encontrado:', $('#open-create-visit-modal').length);
   
+  // Función para mostrar mensajes
+  function showMessage(message, type) {
+    // Crear elemento de mensaje
+    const messageDiv = $('<div class="condo-visitor-message condo-visitor-message-' + type + '">' + message + '</div>');
+    
+    // Agregar al contenedor
+    $('.condo-visitor-container').prepend(messageDiv);
+    
+    // Remover después de 5 segundos
+    setTimeout(function() {
+      messageDiv.fadeOut(function() {
+        messageDiv.remove();
+      });
+    }, 5000);
+  }
+  
   // Función para cargar visitantes de hoy
   function loadTodaysVisitors() {
     $.ajax({
