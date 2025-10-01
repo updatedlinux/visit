@@ -360,6 +360,7 @@ jQuery(document).ready(function($) {
   // Manejar cambio de pestañas
   $('.condo-visitor-tab-btn').click(function() {
     const targetTab = $(this).data('tab');
+    console.log('Cambiando a pestaña:', targetTab);
     
     // Remover clase active de todos los botones y contenidos
     $('.condo-visitor-tab-btn').removeClass('active');
@@ -367,20 +368,25 @@ jQuery(document).ready(function($) {
     
     // Agregar clase active al botón clickeado y su contenido
     $(this).addClass('active');
-    $('#' + targetTab + '-tab').addClass('active');
+    const targetContent = $('#' + targetTab + '-tab');
+    console.log('Contenido objetivo encontrado:', targetContent.length);
+    targetContent.addClass('active');
     
     // Si es la pestaña de creación, cargar propietarios
     if (targetTab === 'create-visit') {
+      console.log('Cargando propietarios...');
       loadPropietarios();
     }
   });
   
   // Cargar lista de propietarios
   function loadPropietarios() {
+    console.log('Iniciando carga de propietarios...');
     $.ajax({
       url: condo_visitor_ajax.api_url + '/users',
       method: 'GET',
       success: function(response) {
+        console.log('Respuesta de usuarios:', response);
         const select = $('#security_propietario');
         select.empty();
         select.append('<option value="">Seleccione el propietario</option>');
@@ -389,6 +395,9 @@ jQuery(document).ready(function($) {
           response.users.forEach(function(user) {
             select.append('<option value="' + user.ID + '">' + user.display_name + ' (' + user.user_email + ')</option>');
           });
+          console.log('Propietarios cargados:', response.users.length);
+        } else {
+          console.log('No se encontraron usuarios');
         }
       },
       error: function() {
