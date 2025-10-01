@@ -111,52 +111,114 @@
                 </tbody>
             </table>
         </div>
+<div class="condo-visitor-container">
+    <h2>Dashboard de Seguridad</h2>
+    
+    <!-- Botón para abrir modal de creación de visita -->
+    <div class="condo-visitor-section">
+        <button class="condo-visitor-btn condo-visitor-btn-primary" id="open-create-visit-modal">
+            <i class="dashicons dashicons-plus-alt"></i> Crear Anuncio de Visita Única
+        </button>
     </div>
     
-    <!-- Pestaña: Creación de Anuncio de Visita Única -->
-    <div id="create-visit-tab" class="condo-visitor-tab-content">
-        <div class="condo-visitor-section">
+    <!-- Validación de Visitantes -->
+    <div class="condo-visitor-section">
+        <h3>Validar Visitante</h3>
+        
+        <div class="condo-visitor-form">
+            <form id="visitor-validation-form">
+                <div class="condo-visitor-search-container">
+                    <input type="text" id="id_card_search" placeholder="Ingrese número de cédula" required>
+                    <button type="submit" class="condo-visitor-btn">Buscar</button>
+                </div>
+            </form>
+            
+            <div id="validation-result">
+                <!-- Los resultados de validación se mostrarán aquí -->
+            </div>
+            
+            <!-- Formulario de registro de llegada (oculto inicialmente) -->
+            <div id="arrival-registration-form" style="display: none;">
+                <h4>Registrar Llegada</h4>
+                <form id="arrival-form">
+                    <div class="condo-visitor-form-group">
+                        <label>
+                            <input type="radio" name="visit_type" value="pedestrian" checked>
+                            Peatonal
+                        </label>
+                        <label>
+                            <input type="radio" name="visit_type" value="vehicle">
+                            Con Vehículo
+                        </label>
+                    </div>
+                    
+                    <div id="vehicle-plate-field" style="display: none;">
+                        <div class="condo-visitor-form-group">
+                            <label for="vehicle_plate">Placa del Vehículo</label>
+                            <input type="text" id="vehicle_plate" name="vehicle_plate" placeholder="Ej: ABC-123" maxlength="20">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="condo-visitor-btn" id="register-arrival-btn" disabled>
+                        Registrar Llegada
+                    </button>
+                </form>
+            </div>
+    </div>
+</div>
+
+<!-- Modal para Creación de Anuncio de Visita Única -->
+<div id="create-visit-modal" class="condo-visitor-modal">
+    <div class="condo-visitor-modal-content">
+        <div class="condo-visitor-modal-header">
             <h3>Creación de Anuncio de Visita Única</h3>
+            <button class="condo-visitor-modal-close" id="close-create-visit-modal">&times;</button>
+        </div>
+        
+        <div class="condo-visitor-modal-body">
             <p class="condo-visitor-description">
                 Use esta opción cuando un propietario llame por teléfono para anunciar una visita única. 
                 Complete los datos del visitante y la fecha de visita.
             </p>
             
-            <div class="condo-visitor-form">
-                <form id="security-create-visit-form">
-                    <div class="condo-visitor-form-group">
-                        <label for="security_first_name">Nombre del Visitante:</label>
-                        <input type="text" id="security_first_name" name="first_name" placeholder="Ej: Juan" required>
-                    </div>
-                    
-                    <div class="condo-visitor-form-group">
-                        <label for="security_last_name">Apellido del Visitante:</label>
-                        <input type="text" id="security_last_name" name="last_name" placeholder="Ej: Pérez" required>
-                    </div>
-                    
-                    <div class="condo-visitor-form-group">
-                        <label for="security_id_card">Número de Cédula:</label>
-                        <input type="text" id="security_id_card" name="id_card" placeholder="Ej: 12345678" required>
-                    </div>
-                    
-                    <div class="condo-visitor-form-group">
-                        <label for="security_visit_date">Fecha de Visita:</label>
-                        <input type="date" id="security_visit_date" name="visit_date" required>
-                    </div>
-                    
-                    <div class="condo-visitor-form-group">
-                        <label for="security_propietario">Propietario que Anuncia:</label>
-                        <select id="security_propietario" name="wp_user_id" required>
-                            <option value="">Seleccione el propietario</option>
-                            <!-- Las opciones se cargarán dinámicamente -->
-                        </select>
-                    </div>
-                    
-                    <button type="submit" class="condo-visitor-btn">
+            <form id="security-create-visit-form">
+                <div class="condo-visitor-form-group">
+                    <label for="security_first_name">Nombre del Visitante:</label>
+                    <input type="text" id="security_first_name" name="first_name" placeholder="Ej: Juan" required>
+                </div>
+                
+                <div class="condo-visitor-form-group">
+                    <label for="security_last_name">Apellido del Visitante:</label>
+                    <input type="text" id="security_last_name" name="last_name" placeholder="Ej: Pérez" required>
+                </div>
+                
+                <div class="condo-visitor-form-group">
+                    <label for="security_id_card">Número de Cédula:</label>
+                    <input type="text" id="security_id_card" name="id_card" placeholder="Ej: 12345678" required>
+                </div>
+                
+                <div class="condo-visitor-form-group">
+                    <label for="security_visit_date">Fecha de Visita:</label>
+                    <input type="date" id="security_visit_date" name="visit_date" required>
+                </div>
+                
+                <div class="condo-visitor-form-group">
+                    <label for="security_propietario">Propietario que Anuncia:</label>
+                    <select id="security_propietario" name="wp_user_id" required>
+                        <option value="">Seleccione el propietario</option>
+                        <!-- Las opciones se cargarán dinámicamente -->
+                    </select>
+                </div>
+                
+                <div class="condo-visitor-modal-footer">
+                    <button type="button" class="condo-visitor-btn condo-visitor-btn-secondary" id="cancel-create-visit">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="condo-visitor-btn condo-visitor-btn-primary">
                         Crear Anuncio de Visita
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -357,25 +419,30 @@ jQuery(document).ready(function($) {
     });
   });
   
-  // Manejar cambio de pestañas
-  $('.condo-visitor-tab-btn').click(function() {
-    const targetTab = $(this).data('tab');
-    console.log('Cambiando a pestaña:', targetTab);
-    
-    // Remover clase active de todos los botones y contenidos
-    $('.condo-visitor-tab-btn').removeClass('active');
-    $('.condo-visitor-tab-content').removeClass('active');
-    
-    // Agregar clase active al botón clickeado y su contenido
-    $(this).addClass('active');
-    const targetContent = $('#' + targetTab + '-tab');
-    console.log('Contenido objetivo encontrado:', targetContent.length);
-    targetContent.addClass('active');
-    
-    // Si es la pestaña de creación, cargar propietarios
-    if (targetTab === 'create-visit') {
-      console.log('Cargando propietarios...');
-      loadPropietarios();
+  // Manejar apertura del modal
+  $('#open-create-visit-modal').click(function() {
+    console.log('Abriendo modal de creación de visita...');
+    $('#create-visit-modal').show();
+    loadPropietarios();
+  });
+  
+  // Manejar cierre del modal
+  $('#close-create-visit-modal, #cancel-create-visit').click(function() {
+    console.log('Cerrando modal...');
+    $('#create-visit-modal').hide();
+  });
+  
+  // Cerrar modal al hacer click fuera del contenido
+  $(document).click(function(event) {
+    if ($(event.target).hasClass('condo-visitor-modal')) {
+      $('#create-visit-modal').hide();
+    }
+  });
+  
+  // Cerrar modal con tecla ESC
+  $(document).keydown(function(event) {
+    if (event.keyCode === 27) { // ESC key
+      $('#create-visit-modal').hide();
     }
   });
   
@@ -445,6 +512,9 @@ jQuery(document).ready(function($) {
         form.find('select').prop('selectedIndex', 0);
         // Establecer fecha por defecto a hoy
         $('#security_visit_date').val(new Date().toISOString().split('T')[0]);
+        
+        // Cerrar modal
+        $('#create-visit-modal').hide();
         
         // Recargar las tablas
         loadTodaysVisitors();

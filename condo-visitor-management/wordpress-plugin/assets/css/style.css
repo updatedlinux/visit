@@ -438,51 +438,163 @@
   border-color: #6c757d;
 }
 
-/* Estilos para pestañas */
-.condo-visitor-tabs {
-  display: flex;
-  border-bottom: 2px solid #e1e1e1;
-  margin-bottom: 20px;
+/* Estilos para botón primario */
+.condo-visitor-btn-primary {
+  background-color: #007cba;
+  border-color: #007cba;
+  color: white;
 }
 
-.condo-visitor-tab-btn {
+.condo-visitor-btn-primary:hover {
+  background-color: #005a87;
+  border-color: #005a87;
+}
+
+.condo-visitor-btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+.condo-visitor-btn-secondary:hover {
+  background-color: #545b62;
+  border-color: #545b62;
+}
+
+/* Estilos para modal */
+.condo-visitor-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+}
+
+.condo-visitor-modal-content {
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.condo-visitor-modal-header {
+  background-color: #007cba;
+  color: white;
+  padding: 20px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.condo-visitor-modal-header h3 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.condo-visitor-modal-close {
   background: none;
   border: none;
-  padding: 12px 24px;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
-  color: #666;
-  border-bottom: 3px solid transparent;
-  transition: all 0.3s ease;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
 }
 
-.condo-visitor-tab-btn:hover {
-  color: #007cba;
+.condo-visitor-modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.condo-visitor-modal-body {
+  padding: 30px;
+}
+
+.condo-visitor-modal-footer {
+  padding: 20px 30px;
   background-color: #f8f9fa;
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
-.condo-visitor-tab-btn.active {
-  color: #007cba;
-  border-bottom-color: #007cba;
-  background-color: #f8f9fa;
+/* Responsive para modal */
+@media (max-width: 768px) {
+  .condo-visitor-modal-content {
+    width: 95%;
+    margin: 10% auto;
+  }
+  
+  .condo-visitor-modal-header {
+    padding: 15px;
+  }
+  
+  .condo-visitor-modal-header h3 {
+    font-size: 1.3em;
+  }
+  
+  .condo-visitor-modal-body {
+    padding: 20px;
+  }
+  
+  .condo-visitor-modal-footer {
+    padding: 15px 20px;
+    flex-direction: column;
+  }
+  
+  .condo-visitor-modal-footer .condo-visitor-btn {
+    width: 100%;
+    margin: 5px 0;
+  }
 }
 
-.condo-visitor-tab-content {
-  display: none;
-}
-
-.condo-visitor-tab-content.active {
-  display: block;
-}
-
-/* Estilos para descripción */
-.condo-visitor-description {
-  background: #e3f2fd;
-  border: 1px solid #bbdefb;
-  border-radius: 4px;
-  padding: 15px;
-  margin-bottom: 20px;
-  color: #1565c0;
-  font-style: italic;
+@media (max-width: 480px) {
+  .condo-visitor-modal-content {
+    width: 98%;
+    margin: 5% auto;
+  }
+  
+  .condo-visitor-modal-header {
+    padding: 12px;
+  }
+  
+  .condo-visitor-modal-header h3 {
+    font-size: 1.2em;
+  }
+  
+  .condo-visitor-modal-body {
+    padding: 15px;
+  }
+  
+  .condo-visitor-modal-footer {
+    padding: 12px 15px;
+  }
 }
