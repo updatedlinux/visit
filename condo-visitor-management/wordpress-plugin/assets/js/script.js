@@ -55,9 +55,14 @@ jQuery(document).ready(function($) {
             data: JSON.stringify(formData),
             success: function(response) {
                 showMessage('Visitante registrado exitosamente', 'success');
-                form.get(0).reset();
+                if (form.length > 0 && form[0]) {
+                    form[0].reset();
+                }
                 // Establecer fecha por defecto a hoy después del reset
-                document.getElementById('unique_visit_date').valueAsDate = new Date();
+                const dateField = document.getElementById('unique_visit_date');
+                if (dateField) {
+                    dateField.valueAsDate = new Date();
+                }
             },
             error: function(xhr) {
                 let errorMessage = 'Error al registrar el visitante';
@@ -109,7 +114,9 @@ jQuery(document).ready(function($) {
             data: JSON.stringify(formData),
             success: function(response) {
                 showMessage('Visitante frecuente registrado exitosamente', 'success');
-                form.get(0).reset();
+                if (form.length > 0 && form[0]) {
+                    form[0].reset();
+                }
                 $('#other-description-field').hide();
                 // Disparar evento para recargar la lista de visitantes frecuentes
                 $(document).trigger('visitor-registered');
