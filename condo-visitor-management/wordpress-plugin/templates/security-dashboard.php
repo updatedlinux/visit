@@ -39,7 +39,7 @@
                         </div>
                     </div>
                     
-                    <button type="submit" class="condo-visitor-btn" id="register-arrival-btn">
+                    <button type="submit" class="condo-visitor-btn" id="register-arrival-btn" disabled>
                         Registrar Llegada
                     </button>
                 </form>
@@ -218,12 +218,29 @@ jQuery(document).ready(function($) {
 
   // Manejar cambio de tipo de visita (peatonal/vehículo)
   $('input[name="visit_type"]').change(function() {
+    const submitBtn = $('#register-arrival-btn');
+    
     if ($(this).val() === 'vehicle') {
       $('#vehicle-plate-field').show();
       $('#vehicle_plate').prop('required', true);
+      submitBtn.prop('disabled', true); // Deshabilitar hasta que se ingrese placa
     } else {
       $('#vehicle-plate-field').hide();
       $('#vehicle_plate').prop('required', false).val('');
+      submitBtn.prop('disabled', false); // Habilitar para peatonal
+    }
+  });
+  
+  // Manejar cambio en campo de placa para habilitar/deshabilitar botón
+  $('#vehicle_plate').on('input', function() {
+    const submitBtn = $('#register-arrival-btn');
+    const plateValue = $(this).val().trim();
+    
+    // Habilitar botón solo si hay placa válida
+    if (plateValue.length > 0) {
+      submitBtn.prop('disabled', false);
+    } else {
+      submitBtn.prop('disabled', true);
     }
   });
 
@@ -233,16 +250,15 @@ jQuery(document).ready(function($) {
     
     const visitType = $('input[name="visit_type"]:checked').val();
     const vehiclePlate = $('#vehicle_plate').val().trim();
-    const visitorId = $('#arrival-form').data('visitor-id');
+    const visitorId = $('#arrival-registration-form').data('visitor-id');
+    const submitBtn = $('#register-arrival-btn');
+    const originalBtnText = submitBtn.text();
     
     // Validar placa si es vehículo
     if (visitType === 'vehicle' && !vehiclePlate) {
       alert('Por favor ingrese la placa del vehículo');
       return;
     }
-    
-    const submitBtn = $('#register-arrival-btn');
-    const originalBtnText = submitBtn.text();
     
     // Deshabilitar botón y mostrar carga
     submitBtn.prop('disabled', true).text('Registrando...');

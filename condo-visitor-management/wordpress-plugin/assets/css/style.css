@@ -424,3 +424,16 @@
 .arrival-form-container input[type="text"] {
   text-transform: uppercase;
 }
+
+/* Estilos para botón deshabilitado */
+.register-arrival-btn:disabled {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.register-arrival-btn:disabled:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}

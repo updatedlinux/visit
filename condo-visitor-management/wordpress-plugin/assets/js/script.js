@@ -186,18 +186,38 @@ jQuery(document).ready(function($) {
         $(`input[name="visit_type_${visitorId}"][value="pedestrian"]`).prop('checked', true);
         $(`.vehicle-plate-field-${visitorId}`).hide();
         $(`#vehicle_plate_${visitorId}`).prop('required', false);
+        
+        // Habilitar botón para peatonal por defecto
+        $(`.register-arrival-btn[data-visitor-id="${visitorId}"]`).prop('disabled', false);
     });
     
     // Manejar cambio de tipo de visita (peatonal/vehículo)
     $(document).on('change', 'input[name^="visit_type_"]', function() {
         const visitorId = $(this).attr('name').split('_')[2];
+        const submitBtn = $(`.register-arrival-btn[data-visitor-id="${visitorId}"]`);
         
         if ($(this).val() === 'vehicle') {
             $(`.vehicle-plate-field-${visitorId}`).show();
             $(`#vehicle_plate_${visitorId}`).prop('required', true);
+            submitBtn.prop('disabled', true); // Deshabilitar hasta que se ingrese placa
         } else {
             $(`.vehicle-plate-field-${visitorId}`).hide();
             $(`#vehicle_plate_${visitorId}`).prop('required', false).val('');
+            submitBtn.prop('disabled', false); // Habilitar para peatonal
+        }
+    });
+    
+    // Manejar cambio en campo de placa para habilitar/deshabilitar botón
+    $(document).on('input', 'input[id^="vehicle_plate_"]', function() {
+        const visitorId = $(this).attr('id').split('_')[2];
+        const submitBtn = $(`.register-arrival-btn[data-visitor-id="${visitorId}"]`);
+        const plateValue = $(this).val().trim();
+        
+        // Habilitar botón solo si hay placa válida
+        if (plateValue.length > 0) {
+            submitBtn.prop('disabled', false);
+        } else {
+            submitBtn.prop('disabled', true);
         }
     });
     
@@ -395,7 +415,7 @@ jQuery(document).ready(function($) {
                 </div>
                 ${visitor.visit_type === 'unique' || visitor.active ? `
                 <button class="condo-visitor-btn show-arrival-form-btn" data-visitor-id="${visitor.id}">
-                    Registrar llegada
+                    ${visitor.arrival_datetime ? 'Registrar Nueva Llegada' : 'Registrar Llegada'}
                 </button>
                 ` : ''}
                 
@@ -421,7 +441,7 @@ jQuery(document).ready(function($) {
                             </div>
                         </div>
                         
-                        <button type="submit" class="condo-visitor-btn register-arrival-btn" data-visitor-id="${visitor.id}">
+                        <button type="submit" class="condo-visitor-btn register-arrival-btn" data-visitor-id="${visitor.id}" disabled>
                             Registrar Llegada
                         </button>
                     </form>
@@ -430,6 +450,19 @@ jQuery(document).ready(function($) {
         `;
         
         resultContainer.html(html);
+        
+        // Si estamos en el dashboard de seguridad, mostrar el formulario estático
+        if ($('#arrival-registration-form').length > 0) {
+            $('#arrival-registration-form').data('visitor-id', visitor.id);
+            $('#arrival-registration-form').show();
+            
+            // Resetear el formulario
+            $('#arrival-form')[0].reset();
+            $('input[name="visit_type"][value="pedestrian"]').prop('checked', true);
+            $('#vehicle-plate-field').hide();
+            $('#vehicle_plate').prop('required', false);
+            $('#register-arrival-btn').prop('disabled', false); // Habilitar para peatonal por defecto
+        }
     }
     
     // Función para mostrar mensajes
