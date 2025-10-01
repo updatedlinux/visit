@@ -51,8 +51,15 @@
                         </button>
                     </form>
                 </div>
-            </div>
         </div>
+    </div>
+    
+    <!-- Botón para abrir modal de creación de visita -->
+    <div class="condo-visitor-section">
+        <button class="condo-visitor-btn condo-visitor-btn-primary" id="open-create-visit-modal">
+            <i class="dashicons dashicons-plus-alt"></i> Crear Anuncio de Visita Única
+        </button>
+    </div>
     
     <!-- Visitantes de Hoy -->
     <div class="condo-visitor-section">
@@ -111,15 +118,11 @@
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
 <div class="condo-visitor-container">
     <h2>Dashboard de Seguridad</h2>
-    
-    <!-- Botón para abrir modal de creación de visita -->
-    <div class="condo-visitor-section">
-        <button class="condo-visitor-btn condo-visitor-btn-primary" id="open-create-visit-modal">
-            <i class="dashicons dashicons-plus-alt"></i> Crear Anuncio de Visita Única
-        </button>
-    </div>
     
     <!-- Validación de Visitantes -->
     <div class="condo-visitor-section">
@@ -225,6 +228,10 @@
 
 <script>
 jQuery(document).ready(function($) {
+  console.log('Script del dashboard cargado correctamente');
+  console.log('Modal encontrado:', $('#create-visit-modal').length);
+  console.log('Botón encontrado:', $('#open-create-visit-modal').length);
+  
   // Función para cargar visitantes de hoy
   function loadTodaysVisitors() {
     $.ajax({
@@ -420,29 +427,32 @@ jQuery(document).ready(function($) {
   });
   
   // Manejar apertura del modal
-  $('#open-create-visit-modal').click(function() {
-    console.log('Abriendo modal de creación de visita...');
-    $('#create-visit-modal').show();
+  $('#open-create-visit-modal').click(function(e) {
+    e.preventDefault();
+    console.log('Click en botón detectado!');
+    console.log('Modal antes de mostrar:', $('#create-visit-modal').hasClass('show'));
+    $('#create-visit-modal').addClass('show');
+    console.log('Modal después de mostrar:', $('#create-visit-modal').hasClass('show'));
     loadPropietarios();
   });
   
   // Manejar cierre del modal
   $('#close-create-visit-modal, #cancel-create-visit').click(function() {
     console.log('Cerrando modal...');
-    $('#create-visit-modal').hide();
+    $('#create-visit-modal').removeClass('show');
   });
   
   // Cerrar modal al hacer click fuera del contenido
   $(document).click(function(event) {
     if ($(event.target).hasClass('condo-visitor-modal')) {
-      $('#create-visit-modal').hide();
+      $('#create-visit-modal').removeClass('show');
     }
   });
   
   // Cerrar modal con tecla ESC
   $(document).keydown(function(event) {
     if (event.keyCode === 27) { // ESC key
-      $('#create-visit-modal').hide();
+      $('#create-visit-modal').removeClass('show');
     }
   });
   
@@ -514,7 +524,7 @@ jQuery(document).ready(function($) {
         $('#security_visit_date').val(new Date().toISOString().split('T')[0]);
         
         // Cerrar modal
-        $('#create-visit-modal').hide();
+        $('#create-visit-modal').removeClass('show');
         
         // Recargar las tablas
         loadTodaysVisitors();
