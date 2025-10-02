@@ -69,7 +69,7 @@
                         <th>Fecha de Visita</th>
                         <th>Tipo de Entrada</th>
                         <th>Placa</th>
-                        <th>Acciones</th>
+                        <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -248,9 +248,9 @@ jQuery(document).ready(function($) {
       var visitDate = visitor.visit_date || 'Frecuente';
       var entryType = visitor.log_visit_type ? (visitor.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
       var vehiclePlate = visitor.vehicle_plate || '-';
-      var actionButton = visitor.arrival_datetime ? 
-        '<span style="color: green;">✓ Llegada registrada</span>' : 
-        '<button class="condo-visitor-btn log-arrival-btn" data-visitor-id="' + visitor.id + '">Registrar Llegada</button>';
+      var statusText = visitor.arrival_datetime ? 
+        '<span style="color: green; font-weight: bold;">✓ Registrado</span>' : 
+        '<span style="color: #dc3545; font-weight: bold;">✗ No ha llegado</span>';
       
       const row = $('<tr></tr>');
       row.append('<td>' + visitor.first_name + ' ' + visitor.last_name + '</td>');
@@ -260,7 +260,7 @@ jQuery(document).ready(function($) {
       row.append('<td>' + visitDate + '</td>');
       row.append('<td>' + entryType + '</td>');
       row.append('<td>' + vehiclePlate + '</td>');
-      row.append('<td>' + actionButton + '</td>');
+      row.append('<td>' + statusText + '</td>');
       tbody.append(row);
     });
   }
