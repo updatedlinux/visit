@@ -17,7 +17,7 @@ function formatVisitorsWithTimezone(visitors) {
     ...visitor,
     visit_date: visitor.visit_date ? formatDateForDisplay(visitor.visit_date) : null,
     arrival_datetime: visitor.arrival_datetime ? formatForDisplay(visitor.arrival_datetime) : null,
-    created_at: formatForDisplay(visitor.created_at),
+    created_at: visitor.created_at ? formatForDisplay(visitor.created_at) : null,
     log_visit_type: visitor.log_visit_type || null,
     vehicle_plate: visitor.vehicle_plate || null
   }));
