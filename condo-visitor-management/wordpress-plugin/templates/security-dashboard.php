@@ -124,6 +124,13 @@
                 <span id="history-page-info">Página 1 de 1</span>
                 <button id="history-next" class="condo-visitor-btn condo-visitor-btn-secondary" disabled>Siguiente</button>
             </div>
+            
+            <!-- Botón de descarga de reporte PDF -->
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="download-pdf-report" class="condo-visitor-btn condo-visitor-btn-primary" style="background-color: #dc3545;">
+                    📄 Descargar Reporte de Visitas
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -690,6 +697,36 @@ jQuery(document).ready(function($) {
     visitHistoryPage++;
     var selectedDate = $('#history-date-filter').val();
     loadVisitHistory(selectedDate);
+  });
+  
+  // Manejador de evento para descarga de reporte PDF
+  $('#download-pdf-report').click(function() {
+    var selectedDate = $('#history-date-filter').val();
+    if (!selectedDate) {
+      showMessage('Por favor seleccione una fecha para generar el reporte', 'error');
+      return;
+    }
+    
+    // Deshabilitar botón y mostrar carga
+    var btn = $(this);
+    var originalText = btn.html();
+    btn.prop('disabled', true).html('📄 Generando PDF...');
+    
+    // Crear URL para descargar el PDF
+    var pdfUrl = condo_visitor_ajax.api_url + '/report/pdf/' + selectedDate;
+    
+    // Crear enlace temporal para descarga
+    var link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = 'reporte-visitas-' + selectedDate + '.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Rehabilitar botón después de un momento
+    setTimeout(function() {
+      btn.prop('disabled', false).html(originalText);
+    }, 2000);
   });
 });
 </script>

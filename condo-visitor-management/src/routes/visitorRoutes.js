@@ -395,4 +395,33 @@ router.get('/debug/time', (req, res) => {
  */
 router.get('/users', visitorController.getUsersController);
 
+/**
+ * @swagger
+ * /report/pdf/{date}:
+ *   get:
+ *     tags: [Visitantes]
+ *     summary: Generar reporte PDF de visitas para una fecha específica
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Fecha en formato YYYY-MM-DD
+ *     responses:
+ *       200:
+ *         description: PDF generado exitosamente
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: Formato de fecha inválido
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/report/pdf/:date', visitorController.generatePDFReportController);
+
 module.exports = router;

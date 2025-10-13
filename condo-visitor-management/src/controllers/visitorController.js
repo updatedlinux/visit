@@ -317,6 +317,241 @@ async function getUsersController(req, res) {
   }
 }
 
+// Generar reporte PDF de visitas para una fecha específica
+async function generatePDFReportController(req, res) {
+  try {
+    const { date } = req.params;
+    
+    // Validar formato de fecha
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date)) {
+      return res.status(400).json({ error: 'Formato de fecha inválido. Use YYYY-MM-DD' });
+    }
+    
+    // Obtener visitantes de la fecha
+    const visitors = await getVisitorsByDate(date);
+    const formattedVisitors = formatVisitorsWithTimezone(visitors);
+    
+    // Generar PDF
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({ margin: 50 });
+    
+    // Configurar headers para descarga
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="reporte-visitas-${date}.pdf"`);
+    
+    // Pipe del documento al response
+    doc.pipe(res);
+    
+    // Agregar logo (centrado)
+    const logoUrl = 'https://bonaventurecclub.com/wp-content/uploads/2025/09/cropped-1-1.png';
+    const https = require('https');
+    
+    // Descargar logo
+    https.get(logoUrl, (logoRes) => {
+      let logoData = Buffer.alloc(0);
+      logoRes.on('data', (chunk) => {
+        logoData = Buffer.concat([logoData, chunk]);
+      });
+      logoRes.on('end', () => {
+        // Agregar logo al PDF
+        doc.image(logoData, {
+          width: 281,
+          height: 94,
+          align: 'center'
+        });
+        
+        // Espacio después del logo
+        doc.moveDown(2);
+        
+        // Título del reporte
+        doc.fontSize(20)
+           .font('Helvetica-Bold')
+           .fillColor('#2c3e50')
+           .text('Reporte de Visitas', { align: 'center' });
+        
+        // Fecha del reporte
+        doc.fontSize(14)
+           .font('Helvetica')
+           .fillColor('#7f8c8d')
+           .text(`Fecha: ${date}`, { align: 'center' });
+        
+        doc.moveDown(1);
+        
+        // Información del reporte
+        doc.fontSize(12)
+           .fillColor('#34495e')
+           .text(`Total de visitas: ${formattedVisitors.length}`, { align: 'center' });
+        
+        doc.moveDown(2);
+        
+        // Tabla de visitantes
+        if (formattedVisitors.length > 0) {
+          // Encabezados de la tabla
+          const tableTop = doc.y;
+          const itemHeight = 20;
+          const colWidths = [80, 100, 80, 60, 80, 60, 80, 100];
+          const colPositions = [50, 130, 230, 290, 350, 430, 490, 570];
+          
+          // Encabezados
+          doc.fontSize(10)
+             .font('Helvetica-Bold')
+             .fillColor('#2c3e50');
+          
+          const headers = ['Nombre', 'Cédula', 'Propietario', 'Tipo', 'Fecha', 'Entrada', 'Placa', 'Llegada'];
+          headers.forEach((header, i) => {
+            doc.text(header, colPositions[i], tableTop);
+          });
+          
+          // Línea separadora
+          doc.moveTo(50, tableTop + itemHeight)
+             .lineTo(670, tableTop + itemHeight)
+             .stroke();
+          
+          // Datos de visitantes
+          doc.fontSize(9)
+             .font('Helvetica')
+             .fillColor('#2c3e50');
+          
+          formattedVisitors.forEach((visitor, index) => {
+            const y = tableTop + (index + 1) * itemHeight + 5;
+            
+            const visitDate = visitor.visit_date || 'Frecuente';
+            const entryType = visitor.log_visit_type ? (visitor.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
+            const vehiclePlate = visitor.vehicle_plate || '-';
+            const arrivalTime = visitor.arrival_datetime || 'No registrada';
+            
+            const rowData = [
+              `${visitor.first_name} ${visitor.last_name}`,
+              visitor.id_card,
+              visitor.owner_name,
+              visitor.visit_type === 'unique' ? 'Única' : 'Frecuente',
+              visitDate,
+              entryType,
+              vehiclePlate,
+              arrivalTime
+            ];
+            
+            rowData.forEach((data, i) => {
+              doc.text(data, colPositions[i], y);
+            });
+          });
+        } else {
+          doc.fontSize(14)
+             .fillColor('#7f8c8d')
+             .text('No hay visitas registradas para esta fecha', { align: 'center' });
+        }
+        
+        // Pie de página
+        doc.moveDown(3);
+        doc.fontSize(10)
+           .fillColor('#95a5a6')
+           .text(`Reporte generado el ${new Date().toLocaleDateString('es-VE')} a las ${new Date().toLocaleTimeString('es-VE')}`, { align: 'center' });
+        
+        // Finalizar documento
+        doc.end();
+      });
+    }).on('error', (err) => {
+      console.error('Error al descargar logo:', err);
+      // Continuar sin logo si hay error
+      generatePDFWithoutLogo();
+    });
+    
+    function generatePDFWithoutLogo() {
+      // Título del reporte
+      doc.fontSize(20)
+         .font('Helvetica-Bold')
+         .fillColor('#2c3e50')
+         .text('Reporte de Visitas', { align: 'center' });
+      
+      // Fecha del reporte
+      doc.fontSize(14)
+         .font('Helvetica')
+         .fillColor('#7f8c8d')
+         .text(`Fecha: ${date}`, { align: 'center' });
+      
+      doc.moveDown(1);
+      
+      // Información del reporte
+      doc.fontSize(12)
+         .fillColor('#34495e')
+         .text(`Total de visitas: ${formattedVisitors.length}`, { align: 'center' });
+      
+      doc.moveDown(2);
+      
+      // Tabla de visitantes
+      if (formattedVisitors.length > 0) {
+        // Encabezados de la tabla
+        const tableTop = doc.y;
+        const itemHeight = 20;
+        const colWidths = [80, 100, 80, 60, 80, 60, 80, 100];
+        const colPositions = [50, 130, 230, 290, 350, 430, 490, 570];
+        
+        // Encabezados
+        doc.fontSize(10)
+           .font('Helvetica-Bold')
+           .fillColor('#2c3e50');
+        
+        const headers = ['Nombre', 'Cédula', 'Propietario', 'Tipo', 'Fecha', 'Entrada', 'Placa', 'Llegada'];
+        headers.forEach((header, i) => {
+          doc.text(header, colPositions[i], tableTop);
+        });
+        
+        // Línea separadora
+        doc.moveTo(50, tableTop + itemHeight)
+           .lineTo(670, tableTop + itemHeight)
+           .stroke();
+        
+        // Datos de visitantes
+        doc.fontSize(9)
+           .font('Helvetica')
+           .fillColor('#2c3e50');
+        
+        formattedVisitors.forEach((visitor, index) => {
+          const y = tableTop + (index + 1) * itemHeight + 5;
+          
+          const visitDate = visitor.visit_date || 'Frecuente';
+          const entryType = visitor.log_visit_type ? (visitor.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
+          const vehiclePlate = visitor.vehicle_plate || '-';
+          const arrivalTime = visitor.arrival_datetime || 'No registrada';
+          
+          const rowData = [
+            `${visitor.first_name} ${visitor.last_name}`,
+            visitor.id_card,
+            visitor.owner_name,
+            visitor.visit_type === 'unique' ? 'Única' : 'Frecuente',
+            visitDate,
+            entryType,
+            vehiclePlate,
+            arrivalTime
+          ];
+          
+          rowData.forEach((data, i) => {
+            doc.text(data, colPositions[i], y);
+          });
+        });
+      } else {
+        doc.fontSize(14)
+           .fillColor('#7f8c8d')
+           .text('No hay visitas registradas para esta fecha', { align: 'center' });
+      }
+      
+      // Pie de página
+      doc.moveDown(3);
+      doc.fontSize(10)
+         .fillColor('#95a5a6')
+         .text(`Reporte generado el ${new Date().toLocaleDateString('es-VE')} a las ${new Date().toLocaleTimeString('es-VE')}`, { align: 'center' });
+      
+      // Finalizar documento
+      doc.end();
+    }
+    
+  } catch (error) {
+    console.error('Error al generar reporte PDF:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+}
+
 module.exports = {
   createUniqueVisitorController,
   createFrequentVisitorController,
@@ -329,5 +564,6 @@ module.exports = {
   getVisitorsByDateController,
   getFrequentVisitorsByUserController,
   getVisitHistoryByDateController,
-  getUsersController
+  getUsersController,
+  generatePDFReportController
 };

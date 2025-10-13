@@ -169,7 +169,7 @@ function getVisitorsByDate(date) {
       AND vl.arrival_datetime >= ? AND vl.arrival_datetime <= ?
     WHERE (
       (v.visit_type = 'unique' AND v.visit_date = ?) OR
-      (v.visit_type = 'frequent' AND v.active = 1)
+      (v.visit_type = 'frequent' AND v.active = 1 AND vl.arrival_datetime IS NOT NULL)
     )
     ORDER BY v.created_at DESC
   `;
