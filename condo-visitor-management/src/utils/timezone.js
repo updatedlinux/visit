@@ -48,7 +48,8 @@ function toVenezuelaISO(date) {
  */
 function formatForDisplay(date) {
   if (!date) return 'No registrada';
-  return moment(date).tz(VENEZUELA_TIMEZONE).format('DD/MM/YYYY hh:mm:ss A');
+  // Asumir que la fecha viene en UTC y convertirla a Venezuela
+  return moment.utc(date).tz(VENEZUELA_TIMEZONE).format('DD/MM/YYYY hh:mm:ss A');
 }
 
 /**
@@ -58,7 +59,8 @@ function formatForDisplay(date) {
  */
 function formatDateForDisplay(date) {
   if (!date) return 'N/A';
-  return moment(date).tz(VENEZUELA_TIMEZONE).format('DD/MM/YYYY');
+  // Asumir que la fecha viene en UTC y convertirla a Venezuela
+  return moment.utc(date).tz(VENEZUELA_TIMEZONE).format('DD/MM/YYYY');
 }
 
 /**
