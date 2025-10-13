@@ -9,7 +9,8 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || 'wordpress',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  timezone: '-04:00' // Configurar zona horaria de Venezuela (GMT-4)
 });
 
 // Exportar el pool promise para uso con async/await
