@@ -76,7 +76,16 @@ function toVenezuelaDateForStorage(date) {
  * @returns {Date} Fecha actual en zona horaria de Venezuela
  */
 function getCurrentVenezuelaDateForStorage() {
-  return moment().tz(VENEZUELA_TIMEZONE).toDate();
+  // Crear una fecha que represente la hora actual de Venezuela
+  // pero que MySQL interprete correctamente
+  const venezuelaMoment = moment().tz(VENEZUELA_TIMEZONE);
+  
+  // Convertir a una fecha que MySQL interprete como hora local
+  // Restar la diferencia de zona horaria para que MySQL lo almacene correctamente
+  const offsetMinutes = venezuelaMoment.utcOffset();
+  const adjustedDate = moment().subtract(offsetMinutes, 'minutes').toDate();
+  
+  return adjustedDate;
 }
 
 module.exports = {
