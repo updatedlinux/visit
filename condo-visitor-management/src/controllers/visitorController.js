@@ -390,8 +390,7 @@ async function generatePDFReportController(req, res) {
           // Encabezados de la tabla
           const tableTop = doc.y;
           const itemHeight = 20;
-          const colWidths = [80, 100, 80, 60, 80, 60, 80, 100];
-          const colPositions = [50, 130, 230, 290, 350, 430, 490, 570];
+          const colPositions = [50, 120, 180, 240, 300, 360, 420, 480];
           
           // Encabezados
           doc.fontSize(10)
@@ -484,8 +483,7 @@ async function generatePDFReportController(req, res) {
         // Encabezados de la tabla
         const tableTop = doc.y;
         const itemHeight = 20;
-        const colWidths = [80, 100, 80, 60, 80, 60, 80, 100];
-        const colPositions = [50, 130, 230, 290, 350, 430, 490, 570];
+        const colPositions = [50, 120, 180, 240, 300, 360, 420, 480];
         
         // Encabezados
         doc.fontSize(10)
