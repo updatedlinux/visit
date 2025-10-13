@@ -165,11 +165,11 @@ function getVisitorsByDate(date) {
       vl.vehicle_plate
     FROM condo360_visitors v
     JOIN wp_users u ON v.wp_user_id = u.ID
-    LEFT JOIN condo360_visit_logs vl ON v.id = vl.visitor_id 
+    INNER JOIN condo360_visit_logs vl ON v.id = vl.visitor_id 
       AND vl.arrival_datetime >= ? AND vl.arrival_datetime <= ?
     WHERE (
       (v.visit_type = 'unique' AND v.visit_date = ?) OR
-      (v.visit_type = 'frequent' AND v.active = 1 AND vl.arrival_datetime IS NOT NULL)
+      (v.visit_type = 'frequent' AND v.active = 1)
     )
     ORDER BY v.created_at DESC
   `;
