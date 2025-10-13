@@ -387,10 +387,13 @@ async function generatePDFReportController(req, res) {
         
         // Tabla de visitantes
         if (formattedVisitors.length > 0) {
+          // Calcular anchos dinámicos basados en el contenido
+          const maxWidths = calculateColumnWidths(formattedVisitors, doc);
+          const colPositions = calculateColumnPositions(maxWidths);
+          
           // Encabezados de la tabla
           const tableTop = doc.y;
           const itemHeight = 20;
-          const colPositions = [50, 120, 180, 240, 300, 360, 420, 480];
           
           // Encabezados
           doc.fontSize(10)
@@ -399,12 +402,12 @@ async function generatePDFReportController(req, res) {
           
           const headers = ['Nombre', 'Cédula', 'Propietario', 'Tipo', 'Fecha', 'Entrada', 'Placa', 'Llegada'];
           headers.forEach((header, i) => {
-            doc.text(header, colPositions[i], tableTop);
+            doc.text(header, colPositions[i], tableTop, { width: maxWidths[i], align: 'left' });
           });
           
           // Línea separadora
           doc.moveTo(50, tableTop + itemHeight)
-             .lineTo(670, tableTop + itemHeight)
+             .lineTo(colPositions[colPositions.length - 1] + maxWidths[maxWidths.length - 1], tableTop + itemHeight)
              .stroke();
           
           // Datos de visitantes
@@ -432,8 +435,15 @@ async function generatePDFReportController(req, res) {
             ];
             
             rowData.forEach((data, i) => {
-              doc.text(data, colPositions[i], y);
+              // Ajustar texto si es muy largo
+              const text = truncateText(data, maxWidths[i], doc);
+              doc.text(text, colPositions[i], y, { width: maxWidths[i], align: 'left' });
             });
+            
+            // Verificar si necesitamos nueva página
+            if (y + itemHeight > doc.page.height - 100) {
+              doc.addPage();
+            }
           });
         } else {
           doc.fontSize(14)
@@ -480,10 +490,13 @@ async function generatePDFReportController(req, res) {
       
       // Tabla de visitantes
       if (formattedVisitors.length > 0) {
+        // Calcular anchos dinámicos basados en el contenido
+        const maxWidths = calculateColumnWidths(formattedVisitors, doc);
+        const colPositions = calculateColumnPositions(maxWidths);
+        
         // Encabezados de la tabla
         const tableTop = doc.y;
         const itemHeight = 20;
-        const colPositions = [50, 120, 180, 240, 300, 360, 420, 480];
         
         // Encabezados
         doc.fontSize(10)
@@ -492,12 +505,12 @@ async function generatePDFReportController(req, res) {
         
         const headers = ['Nombre', 'Cédula', 'Propietario', 'Tipo', 'Fecha', 'Entrada', 'Placa', 'Llegada'];
         headers.forEach((header, i) => {
-          doc.text(header, colPositions[i], tableTop);
+          doc.text(header, colPositions[i], tableTop, { width: maxWidths[i], align: 'left' });
         });
         
         // Línea separadora
         doc.moveTo(50, tableTop + itemHeight)
-           .lineTo(670, tableTop + itemHeight)
+           .lineTo(colPositions[colPositions.length - 1] + maxWidths[maxWidths.length - 1], tableTop + itemHeight)
            .stroke();
         
         // Datos de visitantes
@@ -525,8 +538,15 @@ async function generatePDFReportController(req, res) {
           ];
           
           rowData.forEach((data, i) => {
-            doc.text(data, colPositions[i], y);
+            // Ajustar texto si es muy largo
+            const text = truncateText(data, maxWidths[i], doc);
+            doc.text(text, colPositions[i], y, { width: maxWidths[i], align: 'left' });
           });
+          
+          // Verificar si necesitamos nueva página
+          if (y + itemHeight > doc.page.height - 100) {
+            doc.addPage();
+          }
         });
       } else {
         doc.fontSize(14)
@@ -548,6 +568,76 @@ async function generatePDFReportController(req, res) {
     console.error('Error al generar reporte PDF:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
+}
+
+// Función auxiliar para calcular anchos de columna dinámicos
+function calculateColumnWidths(visitors, doc) {
+  const headers = ['Nombre', 'Cédula', 'Propietario', 'Tipo', 'Fecha', 'Entrada', 'Placa', 'Llegada'];
+  const minWidths = [80, 60, 80, 50, 60, 60, 60, 120]; // Anchos mínimos
+  const maxWidths = [120, 80, 100, 60, 80, 80, 80, 180]; // Anchos máximos
+  
+  // Calcular ancho máximo para cada columna
+  const calculatedWidths = headers.map((header, i) => {
+    let maxWidth = doc.widthOfString(header, { fontSize: 10 });
+    
+    visitors.forEach(visitor => {
+      const visitDate = visitor.visit_date || 'Frecuente';
+      const entryType = visitor.log_visit_type ? (visitor.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
+      const vehiclePlate = visitor.vehicle_plate || '-';
+      const arrivalTime = visitor.arrival_datetime || 'No registrada';
+      
+      let cellValue;
+      switch(i) {
+        case 0: cellValue = `${visitor.first_name} ${visitor.last_name}`; break;
+        case 1: cellValue = visitor.id_card; break;
+        case 2: cellValue = visitor.owner_name; break;
+        case 3: cellValue = visitor.visit_type === 'unique' ? 'Única' : 'Frecuente'; break;
+        case 4: cellValue = visitDate; break;
+        case 5: cellValue = entryType; break;
+        case 6: cellValue = vehiclePlate; break;
+        case 7: cellValue = arrivalTime; break;
+      }
+      
+      const cellWidth = doc.widthOfString(cellValue, { fontSize: 9 });
+      maxWidth = Math.max(maxWidth, cellWidth);
+    });
+    
+    // Aplicar límites mínimos y máximos
+    return Math.max(minWidths[i], Math.min(maxWidths[i], maxWidth + 10));
+  });
+  
+  return calculatedWidths;
+}
+
+// Función auxiliar para calcular posiciones de columna
+function calculateColumnPositions(widths) {
+  const positions = [50]; // Posición inicial
+  let currentPos = 50;
+  
+  for (let i = 0; i < widths.length - 1; i++) {
+    currentPos += widths[i] + 10; // 10px de separación entre columnas
+    positions.push(currentPos);
+  }
+  
+  return positions;
+}
+
+// Función auxiliar para truncar texto si es muy largo
+function truncateText(text, maxWidth, doc) {
+  const fontSize = doc.fontSize || 9;
+  const textWidth = doc.widthOfString(text, { fontSize });
+  
+  if (textWidth <= maxWidth) {
+    return text;
+  }
+  
+  // Truncar texto agregando "..."
+  let truncated = text;
+  while (doc.widthOfString(truncated + '...', { fontSize }) > maxWidth && truncated.length > 0) {
+    truncated = truncated.slice(0, -1);
+  }
+  
+  return truncated + '...';
 }
 
 module.exports = {
