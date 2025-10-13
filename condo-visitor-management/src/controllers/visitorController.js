@@ -317,8 +317,8 @@ async function getUsersController(req, res) {
   }
 }
 
-// Generar reporte PDF de visitas para una fecha específica
-async function generatePDFReportController(req, res) {
+// Generar reporte Excel de visitas para una fecha específica
+async function generateExcelReportController(req, res) {
   try {
     const { date } = req.params;
     
@@ -332,312 +332,105 @@ async function generatePDFReportController(req, res) {
     const visitors = await getVisitorsByDate(date);
     const formattedVisitors = formatVisitorsWithTimezone(visitors);
     
-    // Generar PDF
-    const PDFDocument = require('pdfkit');
-    const doc = new PDFDocument({ margin: 50 });
+    // Crear archivo Excel
+    const ExcelJS = require('exceljs');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Reporte de Visitas');
     
     // Configurar headers para descarga
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="reporte-visitas-${date}.pdf"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="reporte-visitas-${date}.xlsx"`);
     
-    // Pipe del documento al response
-    doc.pipe(res);
+    // Configurar columnas
+    worksheet.columns = [
+      { header: 'Nombre', key: 'nombre', width: 25 },
+      { header: 'Cédula', key: 'cedula', width: 15 },
+      { header: 'Propietario', key: 'propietario', width: 25 },
+      { header: 'Tipo', key: 'tipo', width: 12 },
+      { header: 'Fecha de Visita', key: 'fecha_visita', width: 15 },
+      { header: 'Tipo de Entrada', key: 'tipo_entrada', width: 15 },
+      { header: 'Placa', key: 'placa', width: 12 },
+      { header: 'Hora de Llegada', key: 'hora_llegada', width: 20 }
+    ];
     
-    // Agregar logo (centrado)
-    const logoUrl = 'https://bonaventurecclub.com/wp-content/uploads/2025/09/cropped-1-1.png';
-    const https = require('https');
+    // Estilizar encabezados
+    worksheet.getRow(1).font = { bold: true, size: 12 };
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF2C3E50' }
+    };
+    worksheet.getRow(1).font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     
-    // Descargar logo
-    https.get(logoUrl, (logoRes) => {
-      let logoData = Buffer.alloc(0);
-      logoRes.on('data', (chunk) => {
-        logoData = Buffer.concat([logoData, chunk]);
-      });
-      logoRes.on('end', () => {
-        // Agregar logo al PDF
-        doc.image(logoData, {
-          width: 281,
-          height: 94,
-          align: 'center'
-        });
-        
-        // Espacio después del logo
-        doc.moveDown(2);
-        
-        // Título del reporte
-        doc.fontSize(20)
-           .font('Helvetica-Bold')
-           .fillColor('#2c3e50')
-           .text('Reporte de Visitas', { align: 'center' });
-        
-        // Fecha del reporte
-        doc.fontSize(14)
-           .font('Helvetica')
-           .fillColor('#7f8c8d')
-           .text(`Fecha: ${date}`, { align: 'center' });
-        
-        doc.moveDown(1);
-        
-        // Información del reporte
-        doc.fontSize(12)
-           .fillColor('#34495e')
-           .text(`Total de visitas: ${formattedVisitors.length}`, { align: 'center' });
-        
-        doc.moveDown(2);
-        
-        // Tabla de visitantes
-        if (formattedVisitors.length > 0) {
-          // Calcular anchos dinámicos basados en el contenido
-          const maxWidths = calculateColumnWidths(formattedVisitors, doc);
-          const colPositions = calculateColumnPositions(maxWidths);
-          
-          // Encabezados de la tabla
-          const tableTop = doc.y;
-          const itemHeight = 20;
-          
-          // Encabezados
-          doc.fontSize(10)
-             .font('Helvetica-Bold')
-             .fillColor('#2c3e50');
-          
-          const headers = ['Nombre', 'Cédula', 'Propietario', 'Tipo', 'Fecha', 'Entrada', 'Placa', 'Llegada'];
-          headers.forEach((header, i) => {
-            doc.text(header, colPositions[i], tableTop, { width: maxWidths[i], align: 'left' });
-          });
-          
-          // Línea separadora
-          doc.moveTo(50, tableTop + itemHeight)
-             .lineTo(colPositions[colPositions.length - 1] + maxWidths[maxWidths.length - 1], tableTop + itemHeight)
-             .stroke();
-          
-          // Datos de visitantes
-          doc.fontSize(9)
-             .font('Helvetica')
-             .fillColor('#2c3e50');
-          
-          formattedVisitors.forEach((visitor, index) => {
-            const y = tableTop + (index + 1) * itemHeight + 5;
-            
-            const visitDate = visitor.visit_date || 'Frecuente';
-            const entryType = visitor.log_visit_type ? (visitor.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
-            const vehiclePlate = visitor.vehicle_plate || '-';
-            const arrivalTime = visitor.arrival_datetime || 'No registrada';
-            
-            const rowData = [
-              `${visitor.first_name} ${visitor.last_name}`,
-              visitor.id_card,
-              visitor.owner_name,
-              visitor.visit_type === 'unique' ? 'Única' : 'Frecuente',
-              visitDate,
-              entryType,
-              vehiclePlate,
-              arrivalTime
-            ];
-            
-            rowData.forEach((data, i) => {
-              // Ajustar texto si es muy largo
-              const text = truncateText(data, maxWidths[i], doc);
-              doc.text(text, colPositions[i], y, { width: maxWidths[i], align: 'left' });
-            });
-            
-            // Verificar si necesitamos nueva página
-            if (y + itemHeight > doc.page.height - 100) {
-              doc.addPage();
-            }
-          });
-        } else {
-          doc.fontSize(14)
-             .fillColor('#7f8c8d')
-             .text('No hay visitas registradas para esta fecha', { align: 'center' });
-        }
-        
-        // Pie de página
-        doc.moveDown(3);
-        doc.fontSize(10)
-           .fillColor('#95a5a6')
-           .text(`Reporte generado el ${new Date().toLocaleDateString('es-VE')} a las ${new Date().toLocaleTimeString('es-VE')}`, { align: 'center' });
-        
-        // Finalizar documento
-        doc.end();
-      });
-    }).on('error', (err) => {
-      console.error('Error al descargar logo:', err);
-      // Continuar sin logo si hay error
-      generatePDFWithoutLogo();
-    });
-    
-    function generatePDFWithoutLogo() {
-      // Título del reporte
-      doc.fontSize(20)
-         .font('Helvetica-Bold')
-         .fillColor('#2c3e50')
-         .text('Reporte de Visitas', { align: 'center' });
-      
-      // Fecha del reporte
-      doc.fontSize(14)
-         .font('Helvetica')
-         .fillColor('#7f8c8d')
-         .text(`Fecha: ${date}`, { align: 'center' });
-      
-      doc.moveDown(1);
-      
-      // Información del reporte
-      doc.fontSize(12)
-         .fillColor('#34495e')
-         .text(`Total de visitas: ${formattedVisitors.length}`, { align: 'center' });
-      
-      doc.moveDown(2);
-      
-      // Tabla de visitantes
-      if (formattedVisitors.length > 0) {
-        // Calcular anchos dinámicos basados en el contenido
-        const maxWidths = calculateColumnWidths(formattedVisitors, doc);
-        const colPositions = calculateColumnPositions(maxWidths);
-        
-        // Encabezados de la tabla
-        const tableTop = doc.y;
-        const itemHeight = 20;
-        
-        // Encabezados
-        doc.fontSize(10)
-           .font('Helvetica-Bold')
-           .fillColor('#2c3e50');
-        
-        const headers = ['Nombre', 'Cédula', 'Propietario', 'Tipo', 'Fecha', 'Entrada', 'Placa', 'Llegada'];
-        headers.forEach((header, i) => {
-          doc.text(header, colPositions[i], tableTop, { width: maxWidths[i], align: 'left' });
-        });
-        
-        // Línea separadora
-        doc.moveTo(50, tableTop + itemHeight)
-           .lineTo(colPositions[colPositions.length - 1] + maxWidths[maxWidths.length - 1], tableTop + itemHeight)
-           .stroke();
-        
-        // Datos de visitantes
-        doc.fontSize(9)
-           .font('Helvetica')
-           .fillColor('#2c3e50');
-        
-        formattedVisitors.forEach((visitor, index) => {
-          const y = tableTop + (index + 1) * itemHeight + 5;
-          
-          const visitDate = visitor.visit_date || 'Frecuente';
-          const entryType = visitor.log_visit_type ? (visitor.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
-          const vehiclePlate = visitor.vehicle_plate || '-';
-          const arrivalTime = visitor.arrival_datetime || 'No registrada';
-          
-          const rowData = [
-            `${visitor.first_name} ${visitor.last_name}`,
-            visitor.id_card,
-            visitor.owner_name,
-            visitor.visit_type === 'unique' ? 'Única' : 'Frecuente',
-            visitDate,
-            entryType,
-            vehiclePlate,
-            arrivalTime
-          ];
-          
-          rowData.forEach((data, i) => {
-            // Ajustar texto si es muy largo
-            const text = truncateText(data, maxWidths[i], doc);
-            doc.text(text, colPositions[i], y, { width: maxWidths[i], align: 'left' });
-          });
-          
-          // Verificar si necesitamos nueva página
-          if (y + itemHeight > doc.page.height - 100) {
-            doc.addPage();
-          }
-        });
-      } else {
-        doc.fontSize(14)
-           .fillColor('#7f8c8d')
-           .text('No hay visitas registradas para esta fecha', { align: 'center' });
-      }
-      
-      // Pie de página
-      doc.moveDown(3);
-      doc.fontSize(10)
-         .fillColor('#95a5a6')
-         .text(`Reporte generado el ${new Date().toLocaleDateString('es-VE')} a las ${new Date().toLocaleTimeString('es-VE')}`, { align: 'center' });
-      
-      // Finalizar documento
-      doc.end();
-    }
-    
-  } catch (error) {
-    console.error('Error al generar reporte PDF:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-}
-
-// Función auxiliar para calcular anchos de columna dinámicos
-function calculateColumnWidths(visitors, doc) {
-  const headers = ['Nombre', 'Cédula', 'Propietario', 'Tipo', 'Fecha', 'Entrada', 'Placa', 'Llegada'];
-  const minWidths = [80, 60, 80, 50, 60, 60, 60, 120]; // Anchos mínimos
-  const maxWidths = [120, 80, 100, 60, 80, 80, 80, 180]; // Anchos máximos
-  
-  // Calcular ancho máximo para cada columna
-  const calculatedWidths = headers.map((header, i) => {
-    let maxWidth = doc.widthOfString(header, { fontSize: 10 });
-    
-    visitors.forEach(visitor => {
+    // Agregar datos
+    formattedVisitors.forEach(visitor => {
       const visitDate = visitor.visit_date || 'Frecuente';
       const entryType = visitor.log_visit_type ? (visitor.log_visit_type === 'vehicle' ? 'Vehículo' : 'Peatonal') : 'No registrada';
       const vehiclePlate = visitor.vehicle_plate || '-';
       const arrivalTime = visitor.arrival_datetime || 'No registrada';
       
-      let cellValue;
-      switch(i) {
-        case 0: cellValue = `${visitor.first_name} ${visitor.last_name}`; break;
-        case 1: cellValue = visitor.id_card; break;
-        case 2: cellValue = visitor.owner_name; break;
-        case 3: cellValue = visitor.visit_type === 'unique' ? 'Única' : 'Frecuente'; break;
-        case 4: cellValue = visitDate; break;
-        case 5: cellValue = entryType; break;
-        case 6: cellValue = vehiclePlate; break;
-        case 7: cellValue = arrivalTime; break;
-      }
-      
-      const cellWidth = doc.widthOfString(cellValue, { fontSize: 9 });
-      maxWidth = Math.max(maxWidth, cellWidth);
+      worksheet.addRow({
+        nombre: `${visitor.first_name} ${visitor.last_name}`,
+        cedula: visitor.id_card,
+        propietario: visitor.owner_name,
+        tipo: visitor.visit_type === 'unique' ? 'Única' : 'Frecuente',
+        fecha_visita: visitDate,
+        tipo_entrada: entryType,
+        placa: vehiclePlate,
+        hora_llegada: arrivalTime
+      });
     });
     
-    // Aplicar límites mínimos y máximos
-    return Math.max(minWidths[i], Math.min(maxWidths[i], maxWidth + 10));
-  });
-  
-  return calculatedWidths;
-}
-
-// Función auxiliar para calcular posiciones de columna
-function calculateColumnPositions(widths) {
-  const positions = [50]; // Posición inicial
-  let currentPos = 50;
-  
-  for (let i = 0; i < widths.length - 1; i++) {
-    currentPos += widths[i] + 10; // 10px de separación entre columnas
-    positions.push(currentPos);
+    // Agregar información del reporte en la parte superior
+    worksheet.insertRow(1, ['Reporte de Visitas'], 'i');
+    worksheet.insertRow(2, [`Fecha: ${date}`], 'i');
+    worksheet.insertRow(3, [`Total de visitas: ${formattedVisitors.length}`], 'i');
+    worksheet.insertRow(4, [`Generado el: ${new Date().toLocaleDateString('es-VE')} a las ${new Date().toLocaleTimeString('es-VE')}`], 'i');
+    worksheet.insertRow(5, [''], 'i'); // Línea vacía
+    
+    // Estilizar información del reporte
+    for (let i = 1; i <= 5; i++) {
+      worksheet.getRow(i).font = { bold: true, size: 14 };
+      worksheet.getRow(i).alignment = { horizontal: 'center' };
+    }
+    
+    // Combinar celdas para el título
+    worksheet.mergeCells('A1:H1');
+    worksheet.mergeCells('A2:H2');
+    worksheet.mergeCells('A3:H3');
+    worksheet.mergeCells('A4:H4');
+    worksheet.mergeCells('A5:H5');
+    
+    // Ajustar altura de filas
+    worksheet.getRow(1).height = 25;
+    worksheet.getRow(2).height = 20;
+    worksheet.getRow(3).height = 20;
+    worksheet.getRow(4).height = 20;
+    worksheet.getRow(5).height = 10;
+    
+    // Estilizar todas las celdas de datos
+    worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+      if (rowNumber > 5) { // Solo las filas de datos
+        row.eachCell((cell, colNumber) => {
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+          cell.alignment = { horizontal: 'left', vertical: 'middle' };
+        });
+      }
+    });
+    
+    // Escribir el archivo al response
+    await workbook.xlsx.write(res);
+    res.end();
+    
+  } catch (error) {
+    console.error('Error al generar reporte Excel:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
-  
-  return positions;
-}
-
-// Función auxiliar para truncar texto si es muy largo
-function truncateText(text, maxWidth, doc) {
-  const fontSize = doc.fontSize || 9;
-  const textWidth = doc.widthOfString(text, { fontSize });
-  
-  if (textWidth <= maxWidth) {
-    return text;
-  }
-  
-  // Truncar texto agregando "..."
-  let truncated = text;
-  while (doc.widthOfString(truncated + '...', { fontSize }) > maxWidth && truncated.length > 0) {
-    truncated = truncated.slice(0, -1);
-  }
-  
-  return truncated + '...';
 }
 
 module.exports = {
@@ -653,5 +446,5 @@ module.exports = {
   getFrequentVisitorsByUserController,
   getVisitHistoryByDateController,
   getUsersController,
-  generatePDFReportController
+  generateExcelReportController
 };

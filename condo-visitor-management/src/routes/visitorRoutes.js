@@ -397,10 +397,10 @@ router.get('/users', visitorController.getUsersController);
 
 /**
  * @swagger
- * /report/pdf/{date}:
+ * /report/excel/{date}:
  *   get:
  *     tags: [Visitantes]
- *     summary: Generar reporte PDF de visitas para una fecha específica
+ *     summary: Generar reporte Excel de visitas para una fecha específica
  *     parameters:
  *       - in: path
  *         name: date
@@ -411,9 +411,9 @@ router.get('/users', visitorController.getUsersController);
  *         description: Fecha en formato YYYY-MM-DD
  *     responses:
  *       200:
- *         description: PDF generado exitosamente
+ *         description: Excel generado exitosamente
  *         content:
- *           application/pdf:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
  *             schema:
  *               type: string
  *               format: binary
@@ -422,6 +422,6 @@ router.get('/users', visitorController.getUsersController);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/report/pdf/:date', visitorController.generatePDFReportController);
+router.get('/report/excel/:date', visitorController.generateExcelReportController);
 
 module.exports = router;
