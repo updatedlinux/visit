@@ -1,4 +1,10 @@
 jQuery(document).ready(function($) {
+    // Validación para campos de cédula - solo números
+    $(document).on('input', 'input[name="id_card"]', function() {
+        // Remover cualquier carácter que no sea número
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    
     // Alternar formulario de tipo de visita
     $('.condo-visitor-toggle').on('click', function() {
         const type = $(this).data('type');

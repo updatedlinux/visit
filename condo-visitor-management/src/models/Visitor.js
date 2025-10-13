@@ -9,12 +9,15 @@ async function createUniqueVisitor(visitorData) {
   const { wp_user_id, first_name, last_name, id_card, visit_date } = visitorData;
 
   try {
+    // Usar la fecha/hora actual de Venezuela para created_at
+    const venezuelaTime = getCurrentVenezuelaDateForStorage();
+    
     // Insertar un nuevo visitante único sin verificar duplicados
     const [result] = await db.execute(
       `INSERT INTO condo360_visitors
-       (wp_user_id, first_name, last_name, id_card, visit_date, visit_type)
-       VALUES (?, ?, ?, ?, ?, 'unique')`,
-      [wp_user_id, first_name, last_name, id_card, visit_date]
+       (wp_user_id, first_name, last_name, id_card, visit_date, visit_type, created_at)
+       VALUES (?, ?, ?, ?, ?, 'unique', ?)`,
+      [wp_user_id, first_name, last_name, id_card, visit_date, venezuelaTime]
     );
 
     // Obtener el visitante recién creado
@@ -37,12 +40,15 @@ async function createFrequentVisitor(visitorData) {
   const { wp_user_id, first_name, last_name, id_card, frequent_visit_description, frequent_visit_other_description } = visitorData;
 
   try {
+    // Usar la fecha/hora actual de Venezuela para created_at
+    const venezuelaTime = getCurrentVenezuelaDateForStorage();
+    
     // Insertar el nuevo visitante frecuente sin verificar duplicados
     const [result] = await db.execute(
       `INSERT INTO condo360_visitors
-       (wp_user_id, first_name, last_name, id_card, visit_type, frequent_visit_description, frequent_visit_other_description, active)
-       VALUES (?, ?, ?, ?, 'frequent', ?, ?, 1)`,
-      [wp_user_id, first_name, last_name, id_card, frequent_visit_description, frequent_visit_other_description || null]
+       (wp_user_id, first_name, last_name, id_card, visit_type, frequent_visit_description, frequent_visit_other_description, active, created_at)
+       VALUES (?, ?, ?, ?, 'frequent', ?, ?, 1, ?)`,
+      [wp_user_id, first_name, last_name, id_card, frequent_visit_description, frequent_visit_other_description || null, venezuelaTime]
     );
 
     // Obtener el visitante recién creado con información del propietario

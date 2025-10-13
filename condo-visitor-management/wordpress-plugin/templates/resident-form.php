@@ -33,7 +33,7 @@
                     <div class="condo-visitor-form-col">
                         <div class="condo-visitor-form-group">
                             <label for="unique_id_card">Cédula de Identidad</label>
-                            <input type="text" id="unique_id_card" name="id_card" required>
+                            <input type="text" id="unique_id_card" name="id_card" pattern="[0-9]+" title="Solo se permiten números" required>
                         </div>
                     </div>
                     <div class="condo-visitor-form-col">
@@ -72,7 +72,7 @@
                     <div class="condo-visitor-form-col">
                         <div class="condo-visitor-form-group">
                             <label for="frequent_id_card">Cédula de Identidad</label>
-                            <input type="text" id="frequent_id_card" name="id_card" required>
+                            <input type="text" id="frequent_id_card" name="id_card" pattern="[0-9]+" title="Solo se permiten números" required>
                         </div>
                     </div>
                     <div class="condo-visitor-form-col">
