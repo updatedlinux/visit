@@ -298,6 +298,15 @@
   font-size: 12px;
 }
 
+.condo-visitor-status-pending {
+  color: #856404;
+  font-weight: 600;
+  background: #fff3cd;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
 .condo-visitor-btn-small {
   padding: 6px 12px;
   font-size: 12px;

@@ -12,11 +12,11 @@ async function createDelivery(deliveryData) {
     // Usar la fecha/hora actual de Venezuela para created_at
     const venezuelaTime = getCurrentVenezuelaDateForStorage();
     
-    // Insertar el nuevo delivery
+    // Insertar el nuevo delivery con status 'announced' por defecto
     const [result] = await db.execute(
       `INSERT INTO condo360_deliverys
-       (wp_user_id, name, company, delivery_date, created_at)
-       VALUES (?, ?, ?, ?, ?)`,
+       (wp_user_id, name, company, delivery_date, status, created_at)
+       VALUES (?, ?, ?, ?, 'announced', ?)`,
       [wp_user_id, name, company, delivery_date, venezuelaTime]
     );
 
@@ -59,7 +59,8 @@ function searchDeliverysByOwner(searchTerm) {
       d.*, 
       u.display_name as owner_name,
       u.user_email as owner_email,
-      u.user_nicename as owner_nicename
+      u.user_nicename as owner_nicename,
+      (SELECT COUNT(*) FROM condo360_delivery_logs dl WHERE dl.delivery_id = d.id) as arrival_count
     FROM condo360_deliverys d
     JOIN wp_users u ON d.wp_user_id = u.ID
     WHERE 
@@ -69,6 +70,33 @@ function searchDeliverysByOwner(searchTerm) {
     ORDER BY d.created_at DESC
   `;
   return db.execute(query, [searchPattern, searchPattern, searchPattern]).then(([rows]) => rows);
+}
+
+// Registrar llegada de un delivery
+function logDeliveryArrival(delivery_id) {
+  const venezuelaTime = getCurrentVenezuelaDateForStorage();
+  
+  const query = `
+    INSERT INTO condo360_delivery_logs (delivery_id, arrival_datetime)
+    VALUES (?, ?)
+  `;
+  return db.execute(query, [delivery_id, venezuelaTime]).then(() => {
+    // Actualizar status del delivery a 'arrival_registered'
+    return db.execute(
+      `UPDATE condo360_deliverys SET status = 'arrival_registered' WHERE id = ?`,
+      [delivery_id]
+    );
+  });
+}
+
+// Obtener logs de llegada de un delivery
+function getDeliveryLogs(delivery_id) {
+  const query = `
+    SELECT * FROM condo360_delivery_logs
+    WHERE delivery_id = ?
+    ORDER BY arrival_datetime DESC
+  `;
+  return db.execute(query, [delivery_id]).then(([rows]) => rows);
 }
 
 // Obtener todos los deliverys (para administración)
@@ -90,6 +118,8 @@ module.exports = {
   createDelivery,
   getDeliverysByUser,
   searchDeliverysByOwner,
-  getAllDeliverys
+  getAllDeliverys,
+  logDeliveryArrival,
+  getDeliveryLogs
 };
 

@@ -106,5 +106,51 @@ router.get('/search', deliveryController.searchDeliverysByOwnerController);
  */
 router.get('/all', deliveryController.getAllDeliverysController);
 
+/**
+ * @swagger
+ * /delivery/arrival/{delivery_id}:
+ *   post:
+ *     tags: [Deliverys]
+ *     summary: Registrar llegada de un delivery
+ *     parameters:
+ *       - in: path
+ *         name: delivery_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del delivery
+ *     responses:
+ *       200:
+ *         description: Llegada registrada exitosamente
+ *       400:
+ *         description: ID de delivery requerido
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post('/arrival/:delivery_id', deliveryController.logDeliveryArrivalController);
+
+/**
+ * @swagger
+ * /delivery/logs/{delivery_id}:
+ *   get:
+ *     tags: [Deliverys]
+ *     summary: Obtener logs de llegada de un delivery
+ *     parameters:
+ *       - in: path
+ *         name: delivery_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del delivery
+ *     responses:
+ *       200:
+ *         description: Lista de logs de llegada
+ *       400:
+ *         description: ID de delivery requerido
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/logs/:delivery_id', deliveryController.getDeliveryLogsController);
+
 module.exports = router;
 

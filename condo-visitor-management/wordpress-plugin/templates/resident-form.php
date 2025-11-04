@@ -299,7 +299,16 @@ jQuery(document).ready(function($) {
             contentType: 'application/json',
             data: JSON.stringify(formData),
             success: function(response) {
-                showMessage('Delivery registrado exitosamente', 'success');
+                // Rehabilitar botón inmediatamente
+                submitBtn.prop('disabled', false).text(originalBtnText);
+                
+                // Mostrar mensaje de éxito
+                if (typeof showMessage === 'function') {
+                    showMessage('Delivery registrado exitosamente', 'success');
+                } else {
+                    alert('Delivery registrado exitosamente');
+                }
+                
                 // Limpiar campos manualmente
                 form.find('input[type="text"]').not('#delivery_date_display').not('#delivery_owner').val('');
                 // Restablecer fecha actual
@@ -314,17 +323,19 @@ jQuery(document).ready(function($) {
                 $('#delivery_date_display').val(formattedDateDisplay);
             },
             error: function(xhr) {
+                // Rehabilitar botón en caso de error
+                submitBtn.prop('disabled', false).text(originalBtnText);
+                
                 let errorMessage = 'Error al registrar el delivery';
                 if (xhr.responseJSON && xhr.responseJSON.error) {
                     errorMessage = xhr.responseJSON.error;
                 }
-                showMessage(errorMessage, 'error');
-            },
-            complete: function() {
-                // Rehabilitar botón de envío
-                setTimeout(function() {
-                    submitBtn.prop('disabled', false).text(originalBtnText);
-                }, 100);
+                
+                if (typeof showMessage === 'function') {
+                    showMessage(errorMessage, 'error');
+                } else {
+                    alert(errorMessage);
+                }
             }
         });
     });

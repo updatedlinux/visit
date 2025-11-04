@@ -210,14 +210,14 @@
             
             <div class="condo-visitor-form-group">
                 <label for="delivery-search-input">Buscar por Propietario:</label>
-                <div class="condo-visitor-search-container">
+                <div class="condo-visitor-autocomplete-container">
                     <input type="text" id="delivery-search-input" placeholder="Escriba el nombre o correo del propietario..." style="width: 100%;">
-                    <button class="condo-visitor-btn" id="delivery-search-btn">Buscar</button>
+                    <div id="delivery-suggestions" class="condo-visitor-suggestions"></div>
                 </div>
             </div>
             
             <div id="delivery-search-results" style="margin-top: 20px;">
-                <p style="text-align: center; color: #7f8c8d;">Ingrese un término de búsqueda para comenzar.</p>
+                <p style="text-align: center; color: #7f8c8d;">Escriba el nombre o correo del propietario para buscar deliverys.</p>
             </div>
         </div>
     </div>
@@ -758,24 +758,40 @@ jQuery(document).ready(function($) {
     }
   });
   
-  // Búsqueda de deliverys
-  $('#delivery-search-btn').click(function() {
-    performDeliverySearch();
+  // Búsqueda en tiempo real de deliverys
+  let deliverySearchTimeout;
+  $('#delivery-search-input').on('input', function() {
+    const query = $(this).val().trim();
+    const suggestionsContainer = $('#delivery-suggestions');
+    
+    // Limpiar timeout anterior
+    clearTimeout(deliverySearchTimeout);
+    
+    if (query.length < 2) {
+      suggestionsContainer.empty();
+      $('#delivery-search-results').html('<p style="text-align: center; color: #7f8c8d;">Escriba al menos 2 caracteres para buscar.</p>');
+      return;
+    }
+    
+    // Debounce la búsqueda
+    deliverySearchTimeout = setTimeout(function() {
+      performDeliverySearch(query);
+    }, 300);
   });
   
-  // Búsqueda al presionar Enter
-  $('#delivery-search-input').keypress(function(e) {
-    if (e.which === 13) {
-      e.preventDefault();
-      performDeliverySearch();
+  // Cerrar sugerencias al hacer clic fuera
+  $(document).click(function(e) {
+    if (!$(e.target).closest('.condo-visitor-autocomplete-container').length) {
+      $('#delivery-suggestions').empty();
     }
   });
   
-  function performDeliverySearch() {
-    const searchTerm = $('#delivery-search-input').val().trim();
-    
+  function performDeliverySearch(searchTerm) {
     if (!searchTerm) {
-      showMessage('Por favor ingrese un término de búsqueda', 'error');
+      searchTerm = $('#delivery-search-input').val().trim();
+    }
+    
+    if (!searchTerm || searchTerm.length < 2) {
       return;
     }
     
@@ -795,19 +811,33 @@ jQuery(document).ready(function($) {
           html += '<th>Empresa</th>';
           html += '<th>Fecha de Llegada</th>';
           html += '<th>Propietario</th>';
-          html += '<th>Email del Propietario</th>';
-          html += '<th>Fecha de Registro</th>';
+          html += '<th>Email</th>';
+          html += '<th>Estado</th>';
+          html += '<th>Llegadas</th>';
+          html += '<th>Acción</th>';
           html += '</tr></thead>';
           html += '<tbody>';
           
           response.deliverys.forEach(function(delivery) {
+            const statusClass = delivery.status === 'announced' ? 'condo-visitor-status-pending' : 'condo-visitor-status-active';
+            const statusText = delivery.status_text || (delivery.status === 'announced' ? 'Anunciado' : 'Llegada Registrada');
+            const arrivalCount = delivery.arrival_count || 0;
+            
             html += '<tr>';
             html += '<td>' + (delivery.name || '-') + '</td>';
             html += '<td>' + (delivery.company || '-') + '</td>';
             html += '<td>' + (delivery.delivery_date || '-') + '</td>';
             html += '<td>' + (delivery.owner_name || delivery.owner_nicename || '-') + '</td>';
             html += '<td>' + (delivery.owner_email || '-') + '</td>';
-            html += '<td>' + (delivery.created_at || '-') + '</td>';
+            html += '<td><span class="' + statusClass + '">' + statusText + '</span></td>';
+            html += '<td>' + arrivalCount + '</td>';
+            html += '<td>';
+            html += '<button class="condo-visitor-btn condo-visitor-btn-small register-delivery-arrival" ';
+            html += 'data-delivery-id="' + delivery.id + '" ';
+            html += 'data-delivery-name="' + (delivery.name || '') + '">';
+            html += 'Registrar Llegada';
+            html += '</button>';
+            html += '</td>';
             html += '</tr>';
           });
           
@@ -827,6 +857,49 @@ jQuery(document).ready(function($) {
       }
     });
   }
+  
+  // Manejar registro de llegada de delivery
+  $(document).on('click', '.register-delivery-arrival', function() {
+    const btn = $(this);
+    const deliveryId = btn.data('delivery-id');
+    const deliveryName = btn.data('delivery-name');
+    const originalText = btn.text();
+    
+    if (!deliveryId) {
+      showMessage('Error: ID de delivery no válido', 'error');
+      return;
+    }
+    
+    // Confirmar acción
+    if (!confirm('¿Desea registrar la llegada del delivery "' + deliveryName + '"?')) {
+      return;
+    }
+    
+    // Deshabilitar botón
+    btn.prop('disabled', true).text('Registrando...');
+    
+    $.ajax({
+      url: 'https://api.bonaventurecclub.com/visit/delivery/arrival/' + deliveryId,
+      method: 'POST',
+      success: function(response) {
+        showMessage('Llegada de delivery registrada exitosamente', 'success');
+        
+        // Recargar resultados
+        const searchTerm = $('#delivery-search-input').val().trim();
+        if (searchTerm) {
+          performDeliverySearch(searchTerm);
+        }
+      },
+      error: function(xhr) {
+        let errorMessage = 'Error al registrar la llegada del delivery';
+        if (xhr.responseJSON && xhr.responseJSON.error) {
+          errorMessage = xhr.responseJSON.error;
+        }
+        showMessage(errorMessage, 'error');
+        btn.prop('disabled', false).text(originalText);
+      }
+    });
+  });
   
   // Manejador de evento para descarga de reporte Excel
   $('#download-excel-report').click(function() {

@@ -2,7 +2,9 @@ const {
   createDelivery,
   getDeliverysByUser,
   searchDeliverysByOwner,
-  getAllDeliverys
+  getAllDeliverys,
+  logDeliveryArrival,
+  getDeliveryLogs
 } = require('../models/Delivery');
 const moment = require('moment-timezone');
 
@@ -13,7 +15,10 @@ function formatDeliverysWithTimezone(deliverys) {
   return deliverys.map(delivery => ({
     ...delivery,
     delivery_date: delivery.delivery_date ? moment(delivery.delivery_date).format('YYYY-MM-DD') : null,
-    created_at: delivery.created_at ? moment.tz(delivery.created_at, VENEZUELA_TIMEZONE).format('YYYY-MM-DD HH:mm:ss') : null
+    created_at: delivery.created_at ? moment.tz(delivery.created_at, VENEZUELA_TIMEZONE).format('YYYY-MM-DD HH:mm:ss') : null,
+    status: delivery.status || 'announced',
+    status_text: delivery.status === 'announced' ? 'Anunciado' : 'Llegada Registrada',
+    arrival_count: delivery.arrival_count || 0
   }));
 }
 
@@ -101,10 +106,55 @@ const getAllDeliverysController = async (req, res) => {
   }
 };
 
+// Registrar llegada de un delivery
+const logDeliveryArrivalController = async (req, res) => {
+  try {
+    const { delivery_id } = req.params;
+
+    if (!delivery_id) {
+      return res.status(400).json({ error: 'ID de delivery requerido' });
+    }
+
+    await logDeliveryArrival(delivery_id);
+    
+    res.json({ 
+      message: 'Llegada de delivery registrada exitosamente',
+      delivery_id: delivery_id
+    });
+  } catch (error) {
+    console.error('Error al registrar llegada de delivery:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+// Obtener logs de llegada de un delivery
+const getDeliveryLogsController = async (req, res) => {
+  try {
+    const { delivery_id } = req.params;
+
+    if (!delivery_id) {
+      return res.status(400).json({ error: 'ID de delivery requerido' });
+    }
+
+    const logs = await getDeliveryLogs(delivery_id);
+    const formattedLogs = logs.map(log => ({
+      ...log,
+      arrival_datetime: log.arrival_datetime ? moment.tz(log.arrival_datetime, VENEZUELA_TIMEZONE).format('YYYY-MM-DD HH:mm:ss') : null
+    }));
+
+    res.json({ logs: formattedLogs });
+  } catch (error) {
+    console.error('Error al obtener logs de delivery:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
 module.exports = {
   createDeliveryController,
   getDeliverysByUserController,
   searchDeliverysByOwnerController,
-  getAllDeliverysController
+  getAllDeliverysController,
+  logDeliveryArrivalController,
+  getDeliveryLogsController
 };
 
