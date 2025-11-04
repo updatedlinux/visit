@@ -149,28 +149,28 @@
 <script>
 jQuery(document).ready(function($) {
     // Establecer fecha por defecto a hoy
-    document.getElementById('unique_visit_date').valueAsDate = new Date();
+    var uniqueDateField = document.getElementById('unique_visit_date');
+    if (uniqueDateField) {
+        uniqueDateField.valueAsDate = new Date();
+    }
     
-    // Alternar formulario de tipo de visita (manejo local para asegurar que funcione)
-    $('.condo-visitor-toggle').on('click', function() {
-        const type = $(this).data('type');
-        
+    // Función para manejar el toggle de formularios
+    function handleToggleForm(type) {
         // Actualizar botón activo
         $('.condo-visitor-toggle').removeClass('active');
-        $(this).addClass('active');
+        $('.condo-visitor-toggle[data-type="' + type + '"]').addClass('active');
         
-        // Mostrar/ocultar formularios
+        // Ocultar todos los formularios primero
+        $('#unique-visit-form').hide();
+        $('#frequent-visit-form').hide();
+        $('#delivery-form').hide();
+        
+        // Mostrar el formulario correspondiente
         if (type === 'unique') {
             $('#unique-visit-form').show();
-            $('#frequent-visit-form').hide();
-            $('#delivery-form').hide();
         } else if (type === 'frequent') {
-            $('#unique-visit-form').hide();
             $('#frequent-visit-form').show();
-            $('#delivery-form').hide();
         } else if (type === 'delivery') {
-            $('#unique-visit-form').hide();
-            $('#frequent-visit-form').hide();
             $('#delivery-form').show();
             
             // Establecer fecha actual y nombre del propietario cuando se muestra el formulario
@@ -184,7 +184,21 @@ jQuery(document).ready(function($) {
             
             $('#delivery_date').val(formattedDate);
             $('#delivery_date_display').val(formattedDateDisplay);
-            $('#delivery_owner').val($('#current-wp-user-name').val());
+            var ownerName = $('#current-wp-user-name').val();
+            if (ownerName) {
+                $('#delivery_owner').val(ownerName);
+            }
+        }
+    }
+    
+    // Remover cualquier handler previo y agregar nuestro handler
+    $('.condo-visitor-toggle').off('click').on('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        
+        const type = $(this).data('type');
+        if (type) {
+            handleToggleForm(type);
         }
     });
     

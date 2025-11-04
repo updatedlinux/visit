@@ -6,25 +6,31 @@ jQuery(document).ready(function($) {
     });
     
     // Alternar formulario de tipo de visita
-    $('.condo-visitor-toggle').on('click', function() {
+    // Nota: Este código puede ser sobrescrito por el código en resident-form.php
+    // Se mantiene aquí como fallback, pero el template tiene prioridad
+    $('.condo-visitor-toggle').off('click').on('click', function(e) {
+        // Solo ejecutar si no hay un handler más específico en el template
+        if ($(this).closest('.condo-visitor-container').length === 0) {
+            return;
+        }
+        
         const type = $(this).data('type');
         
         // Actualizar botón activo
         $('.condo-visitor-toggle').removeClass('active');
         $(this).addClass('active');
         
-        // Mostrar/ocultar formularios
+        // Ocultar todos los formularios primero
+        $('#unique-visit-form').hide();
+        $('#frequent-visit-form').hide();
+        $('#delivery-form').hide();
+        
+        // Mostrar el formulario correspondiente
         if (type === 'unique') {
             $('#unique-visit-form').show();
-            $('#frequent-visit-form').hide();
-            $('#delivery-form').hide();
         } else if (type === 'frequent') {
-            $('#unique-visit-form').hide();
             $('#frequent-visit-form').show();
-            $('#delivery-form').hide();
         } else if (type === 'delivery') {
-            $('#unique-visit-form').hide();
-            $('#frequent-visit-form').hide();
             $('#delivery-form').show();
             
             // Establecer fecha actual y nombre del propietario cuando se muestra el formulario
