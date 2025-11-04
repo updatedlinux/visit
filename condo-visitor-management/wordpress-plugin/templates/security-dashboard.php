@@ -136,6 +136,52 @@
             </div>
         </div>
     </div>
+    
+    <!-- Historial de Deliverys -->
+    <div class="condo-visitor-section">
+        <h3>Historial de Deliverys</h3>
+        
+        <div class="condo-visitor-form">
+            <div class="condo-visitor-search-container">
+                <input type="date" id="delivery-history-date-filter">
+                <button class="condo-visitor-btn" id="filter-delivery-history-btn">Filtrar</button>
+            </div>
+            
+            <table class="condo-visitor-table" id="delivery-history">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Empresa</th>
+                        <th>Fecha de Llegada</th>
+                        <th>Propietario</th>
+                        <th>Email del Propietario</th>
+                        <th>Estado</th>
+                        <th>Total de Llegadas</th>
+                        <th>Hora de Llegada</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="8" style="text-align: center;">Cargando historial de deliverys...</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- Paginación para Historial de Deliverys -->
+            <div id="delivery-history-pagination" class="condo-visitor-pagination" style="display: none;">
+                <button id="delivery-history-prev" class="condo-visitor-btn condo-visitor-btn-secondary" disabled>Anterior</button>
+                <span id="delivery-history-page-info">Página 1 de 1</span>
+                <button id="delivery-history-next" class="condo-visitor-btn condo-visitor-btn-secondary" disabled>Siguiente</button>
+            </div>
+            
+            <!-- Botón de descarga de reporte Excel -->
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="download-delivery-excel-report" class="condo-visitor-btn condo-visitor-btn-primary" style="background-color: #17a2b8;">
+                    📊 Descargar Reporte de Deliverys
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal para Creación de Anuncio de Visita Única -->
@@ -232,6 +278,7 @@ jQuery(document).ready(function($) {
   // Variables de paginación
   let todaysVisitorsPage = 1;
   let visitHistoryPage = 1;
+  let deliveryHistoryPage = 1;
   const itemsPerPage = 20;
   
   // Función para mostrar mensajes
@@ -331,6 +378,34 @@ jQuery(document).ready(function($) {
     });
   }
   
+  function renderDeliveryHistoryTable(deliverys) {
+    const tbody = $('#delivery-history tbody');
+    tbody.empty();
+    
+    if (deliverys.length === 0) {
+      tbody.append('<tr><td colspan="8" style="text-align: center;">No hay deliverys para esta fecha</td></tr>');
+      return;
+    }
+    
+    deliverys.forEach(function(delivery) {
+      const statusClass = delivery.status === 'announced' ? 'condo-visitor-status-pending' : 'condo-visitor-status-active';
+      const statusText = delivery.status_text || (delivery.status === 'announced' ? 'Anunciado' : 'Llegada Registrada');
+      const arrivalCount = delivery.arrival_count || 0;
+      const arrivalTime = delivery.arrival_datetime || 'No registrada';
+      
+      const row = $('<tr></tr>');
+      row.append('<td>' + (delivery.name || '-') + '</td>');
+      row.append('<td>' + (delivery.company || '-') + '</td>');
+      row.append('<td>' + (delivery.delivery_date || '-') + '</td>');
+      row.append('<td>' + (delivery.owner_name || delivery.owner_nicename || '-') + '</td>');
+      row.append('<td>' + (delivery.owner_email || '-') + '</td>');
+      row.append('<td><span class="' + statusClass + '">' + statusText + '</span></td>');
+      row.append('<td>' + arrivalCount + '</td>');
+      row.append('<td>' + arrivalTime + '</td>');
+      tbody.append(row);
+    });
+  }
+  
   // Función para cargar visitantes de hoy
   function loadTodaysVisitors() {
     $.ajax({
@@ -397,14 +472,51 @@ jQuery(document).ready(function($) {
     });
   }
 
+  // Función para cargar historial de deliverys
+  function loadDeliveryHistory(date) {
+    $.ajax({
+      url: 'https://api.bonaventurecclub.com/visit/delivery/history/date?date=' + encodeURIComponent(date),
+      method: 'GET',
+      success: function(response) {
+        if (response.deliverys && response.deliverys.length > 0) {
+          // Aplicar paginación
+          const paginatedDeliverys = updatePaginationControls(
+            response.deliverys, 
+            deliveryHistoryPage, 
+            'delivery-history-pagination', 
+            'delivery-history-prev', 
+            'delivery-history-next', 
+            'delivery-history-page-info'
+          );
+          
+          // Renderizar tabla con datos paginados
+          renderDeliveryHistoryTable(paginatedDeliverys);
+        } else {
+          $('#delivery-history tbody').html('<tr><td colspan="8" style="text-align: center;">No hay historial de deliverys para esta fecha</td></tr>');
+          $('#delivery-history-pagination').hide();
+        }
+      },
+      error: function() {
+        console.error('Error al obtener historial de deliverys');
+        var tbody = $('#delivery-history tbody');
+        tbody.empty();
+        tbody.append('<tr><td colspan="8" style="text-align:center; color: red;">Error al cargar historial de deliverys.</td></tr>');
+      }
+    });
+  }
+
   // Establecer fecha por defecto a hoy
   $('#history-date-filter').val(new Date().toISOString().split('T')[0]);
+  $('#delivery-history-date-filter').val(new Date().toISOString().split('T')[0]);
 
   // Cargar visitantes de hoy al cargar la página
   loadTodaysVisitors();
 
   // Cargar historial de visitas al cargar la página
   loadVisitHistory($('#history-date-filter').val());
+
+  // Cargar historial de deliverys al cargar la página
+  loadDeliveryHistory($('#delivery-history-date-filter').val());
 
   // Refrescar visitantes de hoy cada 5 segundos
   var todaysInterval = setInterval(loadTodaysVisitors, 5000);
@@ -415,6 +527,29 @@ jQuery(document).ready(function($) {
     visitHistoryPage = 1; // Reiniciar página al cambiar fecha
     var selectedDate = $('#history-date-filter').val();
     loadVisitHistory(selectedDate);
+  });
+
+  // Filtrar historial de deliverys por fecha
+  $('#filter-delivery-history-btn').click(function(e) {
+    e.preventDefault();
+    deliveryHistoryPage = 1; // Reiniciar página al cambiar fecha
+    var selectedDate = $('#delivery-history-date-filter').val();
+    loadDeliveryHistory(selectedDate);
+  });
+
+  // Manejadores de eventos para paginación de Historial de Deliverys
+  $('#delivery-history-prev').click(function() {
+    if (deliveryHistoryPage > 1) {
+      deliveryHistoryPage--;
+      var selectedDate = $('#delivery-history-date-filter').val();
+      loadDeliveryHistory(selectedDate);
+    }
+  });
+  
+  $('#delivery-history-next').click(function() {
+    deliveryHistoryPage++;
+    var selectedDate = $('#delivery-history-date-filter').val();
+    loadDeliveryHistory(selectedDate);
   });
 
   // Limpiar el interval cuando la página se descarga
@@ -901,7 +1036,7 @@ jQuery(document).ready(function($) {
     });
   });
   
-  // Manejador de evento para descarga de reporte Excel
+  // Manejador de evento para descarga de reporte Excel de visitas
   $('#download-excel-report').click(function() {
     var selectedDate = $('#history-date-filter').val();
     if (!selectedDate) {
@@ -921,6 +1056,36 @@ jQuery(document).ready(function($) {
     var link = document.createElement('a');
     link.href = excelUrl;
     link.download = 'reporte-visitas-' + selectedDate + '.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Rehabilitar botón después de un momento
+    setTimeout(function() {
+      btn.prop('disabled', false).html(originalText);
+    }, 2000);
+  });
+
+  // Manejador de evento para descarga de reporte Excel de deliverys
+  $('#download-delivery-excel-report').click(function() {
+    var selectedDate = $('#delivery-history-date-filter').val();
+    if (!selectedDate) {
+      showMessage('Por favor seleccione una fecha para generar el reporte', 'error');
+      return;
+    }
+    
+    // Deshabilitar botón y mostrar carga
+    var btn = $(this);
+    var originalText = btn.html();
+    btn.prop('disabled', true).html('📊 Generando Excel...');
+    
+    // Crear URL para descargar el Excel
+    var excelUrl = 'https://api.bonaventurecclub.com/visit/delivery/report/excel/' + selectedDate;
+    
+    // Crear enlace temporal para descarga
+    var link = document.createElement('a');
+    link.href = excelUrl;
+    link.download = 'reporte-deliverys-' + selectedDate + '.xlsx';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

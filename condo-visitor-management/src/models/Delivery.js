@@ -99,6 +99,30 @@ function getDeliveryLogs(delivery_id) {
   return db.execute(query, [delivery_id]).then(([rows]) => rows);
 }
 
+// Obtener deliverys de una fecha específica (solo los que tienen llegadas registradas)
+function getDeliverysByDate(date) {
+  // Convertir la fecha a rango de zona horaria de Venezuela
+  const startOfDay = moment.tz(date, VENEZUELA_TIMEZONE).startOf('day').toDate();
+  const endOfDay = moment.tz(date, VENEZUELA_TIMEZONE).endOf('day').toDate();
+  
+  const query = `
+    SELECT 
+      d.*, 
+      u.display_name as owner_name,
+      u.user_email as owner_email,
+      u.user_nicename as owner_nicename,
+      dl.arrival_datetime,
+      dl.id as log_id,
+      (SELECT COUNT(*) FROM condo360_delivery_logs dl2 WHERE dl2.delivery_id = d.id) as arrival_count
+    FROM condo360_deliverys d
+    JOIN wp_users u ON d.wp_user_id = u.ID
+    INNER JOIN condo360_delivery_logs dl ON d.id = dl.delivery_id 
+      AND dl.arrival_datetime >= ? AND dl.arrival_datetime <= ?
+    ORDER BY dl.arrival_datetime DESC
+  `;
+  return db.execute(query, [startOfDay, endOfDay]).then(([rows]) => rows);
+}
+
 // Obtener todos los deliverys (para administración)
 function getAllDeliverys() {
   const query = `
@@ -120,6 +144,7 @@ module.exports = {
   searchDeliverysByOwner,
   getAllDeliverys,
   logDeliveryArrival,
-  getDeliveryLogs
+  getDeliveryLogs,
+  getDeliverysByDate
 };
 

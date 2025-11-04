@@ -152,5 +152,58 @@ router.post('/arrival/:delivery_id', deliveryController.logDeliveryArrivalContro
  */
 router.get('/logs/:delivery_id', deliveryController.getDeliveryLogsController);
 
+/**
+ * @swagger
+ * /delivery/history/date:
+ *   get:
+ *     tags: [Deliverys]
+ *     summary: Obtener historial de deliverys filtrado por fecha
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Fecha en formato YYYY-MM-DD
+ *     responses:
+ *       200:
+ *         description: Lista de deliverys del día
+ *       400:
+ *         description: Fecha requerida
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/history/date', deliveryController.getDeliverysHistoryByDateController);
+
+/**
+ * @swagger
+ * /delivery/report/excel/{date}:
+ *   get:
+ *     tags: [Deliverys]
+ *     summary: Generar reporte Excel de deliverys para una fecha específica
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Fecha en formato YYYY-MM-DD
+ *     responses:
+ *       200:
+ *         description: Excel generado exitosamente
+ *         content:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: Formato de fecha inválido
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/report/excel/:date', deliveryController.generateDeliveryExcelReportController);
+
 module.exports = router;
 
