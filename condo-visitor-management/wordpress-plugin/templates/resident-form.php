@@ -1,5 +1,9 @@
 <div class="condo-visitor-container">
     <input type="hidden" id="current-wp-user-id" value="<?php echo get_current_user_id(); ?>">
+    <input type="hidden" id="current-wp-user-name" value="<?php 
+        $current_user = wp_get_current_user();
+        echo esc_attr($current_user->display_name ? $current_user->display_name : $current_user->user_nicename);
+    ?>">
     
     <div class="condo-visitor-section">
         <h2>Registro de Visitantes</h2>
@@ -7,6 +11,7 @@
         <div class="condo-visitor-form-group">
             <button class="condo-visitor-toggle active" data-type="unique">Visita Única</button>
             <button class="condo-visitor-toggle" data-type="frequent">Visita Frecuente</button>
+            <button class="condo-visitor-toggle" data-type="delivery">Deliverys</button>
         </div>
         
         <!-- Formulario de Visita Única -->
@@ -95,6 +100,36 @@
                 </div>
                 
                 <button type="submit" class="condo-visitor-btn">Registrar Visitante Frecuente</button>
+            </form>
+        </div>
+        
+        <!-- Formulario de Delivery -->
+        <div id="delivery-form" class="condo-visitor-form" style="display: none;">
+            <h3>Registrar Delivery</h3>
+            
+            <form id="delivery-registration-form">
+                <div class="condo-visitor-form-group">
+                    <label for="delivery_name">Nombre y/o Apellido</label>
+                    <input type="text" id="delivery_name" name="name" placeholder="Ej: Juan Pérez o Delivery Express" required>
+                </div>
+                
+                <div class="condo-visitor-form-group">
+                    <label for="delivery_date_display">Fecha de Llegada del Delivery</label>
+                    <input type="text" id="delivery_date_display" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                    <input type="hidden" id="delivery_date" name="delivery_date">
+                </div>
+                
+                <div class="condo-visitor-form-group">
+                    <label for="delivery_company">Empresa</label>
+                    <input type="text" id="delivery_company" name="company" placeholder="Ej: PedidosYa, Rappi, Delivery Express" required>
+                </div>
+                
+                <div class="condo-visitor-form-group">
+                    <label for="delivery_owner">Propietario Solicitante</label>
+                    <input type="text" id="delivery_owner" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                </div>
+                
+                <button type="submit" class="condo-visitor-btn">Registrar Delivery</button>
             </form>
         </div>
     </div>

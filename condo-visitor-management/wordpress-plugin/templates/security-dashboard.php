@@ -47,10 +47,13 @@
         </div>
     </div>
     
-    <!-- Botón para abrir modal de creación de visita -->
+    <!-- Botones para gestión de visitas y deliverys -->
     <div class="condo-visitor-section">
         <button class="condo-visitor-btn condo-visitor-btn-primary" id="open-create-visit-modal">
             <i class="dashicons dashicons-plus-alt"></i> Crear Anuncio de Visita Única
+        </button>
+        <button class="condo-visitor-btn condo-visitor-btn-primary" id="open-delivery-management-modal" style="margin-left: 10px;">
+            <i class="dashicons dashicons-cart"></i> Gestión de Deliverys
         </button>
     </div>
     
@@ -188,6 +191,34 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Gestión de Deliverys -->
+<div id="delivery-management-modal" class="condo-visitor-modal">
+    <div class="condo-visitor-modal-content">
+        <div class="condo-visitor-modal-header">
+            <h3>Gestión de Deliverys</h3>
+            <button class="condo-visitor-modal-close" id="close-delivery-management-modal">&times;</button>
+        </div>
+        
+        <div class="condo-visitor-modal-body">
+            <p class="condo-visitor-description">
+                Busque deliverys por nombre o correo del propietario.
+            </p>
+            
+            <div class="condo-visitor-form-group">
+                <label for="delivery-search-input">Buscar por Propietario:</label>
+                <div class="condo-visitor-search-container">
+                    <input type="text" id="delivery-search-input" placeholder="Escriba el nombre o correo del propietario..." style="width: 100%;">
+                    <button class="condo-visitor-btn" id="delivery-search-btn">Buscar</button>
+                </div>
+            </div>
+            
+            <div id="delivery-search-results" style="margin-top: 20px;">
+                <p style="text-align: center; color: #7f8c8d;">Ingrese un término de búsqueda para comenzar.</p>
+            </div>
         </div>
     </div>
 </div>
@@ -698,6 +729,104 @@ jQuery(document).ready(function($) {
     var selectedDate = $('#history-date-filter').val();
     loadVisitHistory(selectedDate);
   });
+  
+  // Manejadores de eventos para modal de Gestión de Deliverys
+  $('#open-delivery-management-modal').click(function(e) {
+    e.preventDefault();
+    $('#delivery-management-modal').addClass('show');
+  });
+  
+  $('#close-delivery-management-modal').click(function() {
+    $('#delivery-management-modal').removeClass('show');
+    $('#delivery-search-input').val('');
+    $('#delivery-search-results').html('<p style="text-align: center; color: #7f8c8d;">Ingrese un término de búsqueda para comenzar.</p>');
+  });
+  
+  // Cerrar modal al hacer clic fuera
+  $(document).click(function(event) {
+    if ($(event.target).hasClass('condo-visitor-modal') && $(event.target).attr('id') === 'delivery-management-modal') {
+      $('#delivery-management-modal').removeClass('show');
+      $('#delivery-search-input').val('');
+      $('#delivery-search-results').html('<p style="text-align: center; color: #7f8c8d;">Ingrese un término de búsqueda para comenzar.</p>');
+    }
+  });
+  
+  // Cerrar modal con tecla ESC
+  $(document).keydown(function(event) {
+    if (event.keyCode === 27) { // ESC key
+      $('#delivery-management-modal').removeClass('show');
+    }
+  });
+  
+  // Búsqueda de deliverys
+  $('#delivery-search-btn').click(function() {
+    performDeliverySearch();
+  });
+  
+  // Búsqueda al presionar Enter
+  $('#delivery-search-input').keypress(function(e) {
+    if (e.which === 13) {
+      e.preventDefault();
+      performDeliverySearch();
+    }
+  });
+  
+  function performDeliverySearch() {
+    const searchTerm = $('#delivery-search-input').val().trim();
+    
+    if (!searchTerm) {
+      showMessage('Por favor ingrese un término de búsqueda', 'error');
+      return;
+    }
+    
+    const resultsContainer = $('#delivery-search-results');
+    resultsContainer.html('<p style="text-align: center; color: #7f8c8d;">Buscando...</p>');
+    
+    $.ajax({
+      url: 'https://api.bonaventurecclub.com/delivery/search',
+      method: 'GET',
+      data: { search: searchTerm },
+      success: function(response) {
+        if (response.deliverys && response.deliverys.length > 0) {
+          let html = '<div class="condo-visitor-table-container">';
+          html += '<table class="condo-visitor-table">';
+          html += '<thead><tr>';
+          html += '<th>Nombre</th>';
+          html += '<th>Empresa</th>';
+          html += '<th>Fecha de Llegada</th>';
+          html += '<th>Propietario</th>';
+          html += '<th>Email del Propietario</th>';
+          html += '<th>Fecha de Registro</th>';
+          html += '</tr></thead>';
+          html += '<tbody>';
+          
+          response.deliverys.forEach(function(delivery) {
+            html += '<tr>';
+            html += '<td>' + (delivery.name || '-') + '</td>';
+            html += '<td>' + (delivery.company || '-') + '</td>';
+            html += '<td>' + (delivery.delivery_date || '-') + '</td>';
+            html += '<td>' + (delivery.owner_name || delivery.owner_nicename || '-') + '</td>';
+            html += '<td>' + (delivery.owner_email || '-') + '</td>';
+            html += '<td>' + (delivery.created_at || '-') + '</td>';
+            html += '</tr>';
+          });
+          
+          html += '</tbody></table></div>';
+          resultsContainer.html(html);
+        } else {
+          resultsContainer.html('<p class="condo-visitor-no-data">No se encontraron deliverys para este propietario.</p>');
+        }
+      },
+      error: function(xhr) {
+        let errorMessage = 'Error al buscar deliverys';
+        if (xhr.responseJSON && xhr.responseJSON.error) {
+          errorMessage = xhr.responseJSON.error;
+        }
+        showMessage(errorMessage, 'error');
+        resultsContainer.html('<p class="condo-visitor-error">Error al realizar la búsqueda.</p>');
+      }
+    });
+  }
   
   // Manejador de evento para descarga de reporte Excel
   $('#download-excel-report').click(function() {

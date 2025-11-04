@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('./middleware/cors');
 const visitorRoutes = require('./routes/visitorRoutes');
+const deliveryRoutes = require('./routes/deliveryRoutes');
 const swagger = require('./config/swagger');
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 
 // Rutas de la API
 app.use('/visit', visitorRoutes);
+app.use('/delivery', deliveryRoutes);
 
 // Documentación Swagger (montada en la raíz)
 app.use('/visit/api-docs', swagger.serve, swagger.setup);
