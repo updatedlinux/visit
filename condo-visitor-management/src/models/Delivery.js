@@ -111,16 +111,18 @@ function getDeliverysByDate(date) {
       u.display_name as owner_name,
       u.user_email as owner_email,
       u.user_nicename as owner_nicename,
-      dl.arrival_datetime,
-      dl.id as log_id,
-      (SELECT COUNT(*) FROM condo360_delivery_logs dl2 WHERE dl2.delivery_id = d.id) as arrival_count
+      MAX(dl.arrival_datetime) as last_arrival_datetime,
+      (SELECT COUNT(*) FROM condo360_delivery_logs dl2 
+       WHERE dl2.delivery_id = d.id 
+       AND dl2.arrival_datetime >= ? AND dl2.arrival_datetime <= ?) as arrival_count
     FROM condo360_deliverys d
     JOIN wp_users u ON d.wp_user_id = u.ID
     INNER JOIN condo360_delivery_logs dl ON d.id = dl.delivery_id 
       AND dl.arrival_datetime >= ? AND dl.arrival_datetime <= ?
-    ORDER BY dl.arrival_datetime DESC
+    GROUP BY d.id
+    ORDER BY last_arrival_datetime DESC
   `;
-  return db.execute(query, [startOfDay, endOfDay]).then(([rows]) => rows);
+  return db.execute(query, [startOfDay, endOfDay, startOfDay, endOfDay]).then(([rows]) => rows);
 }
 
 // Obtener todos los deliverys (para administración)

@@ -13,15 +13,23 @@ const VENEZUELA_TIMEZONE = 'America/Caracas';
 
 // Formatear deliverys con timezone
 function formatDeliverysWithTimezone(deliverys) {
-  return deliverys.map(delivery => ({
-    ...delivery,
-    delivery_date: delivery.delivery_date ? moment(delivery.delivery_date).format('YYYY-MM-DD') : null,
-    created_at: delivery.created_at ? moment.tz(delivery.created_at, VENEZUELA_TIMEZONE).format('YYYY-MM-DD HH:mm:ss') : null,
-    arrival_datetime: delivery.arrival_datetime ? moment.tz(delivery.arrival_datetime, VENEZUELA_TIMEZONE).format('YYYY-MM-DD HH:mm:ss') : null,
-    status: delivery.status || 'announced',
-    status_text: delivery.status === 'announced' ? 'Anunciado' : 'Llegada Registrada',
-    arrival_count: delivery.arrival_count || 0
-  }));
+  return deliverys.map(delivery => {
+    let arrivalDateTimeFormatted = null;
+    if (delivery.arrival_datetime || delivery.last_arrival_datetime) {
+      const arrivalTime = delivery.arrival_datetime || delivery.last_arrival_datetime;
+      arrivalDateTimeFormatted = moment.tz(arrivalTime, VENEZUELA_TIMEZONE).format('YYYY-MM-DD hh:mm:ss A');
+    }
+    
+    return {
+      ...delivery,
+      delivery_date: delivery.delivery_date ? moment(delivery.delivery_date).format('YYYY-MM-DD') : null,
+      created_at: delivery.created_at ? moment.tz(delivery.created_at, VENEZUELA_TIMEZONE).format('YYYY-MM-DD hh:mm:ss A') : null,
+      arrival_datetime: arrivalDateTimeFormatted,
+      status: delivery.status || 'announced',
+      status_text: delivery.status === 'announced' ? 'Anunciado' : 'Llegada Registrada',
+      arrival_count: delivery.arrival_count || 0
+    };
+  });
 }
 
 // Crear un nuevo delivery
@@ -141,7 +149,7 @@ const getDeliveryLogsController = async (req, res) => {
     const logs = await getDeliveryLogs(delivery_id);
     const formattedLogs = logs.map(log => ({
       ...log,
-      arrival_datetime: log.arrival_datetime ? moment.tz(log.arrival_datetime, VENEZUELA_TIMEZONE).format('YYYY-MM-DD HH:mm:ss') : null
+      arrival_datetime: log.arrival_datetime ? moment.tz(log.arrival_datetime, VENEZUELA_TIMEZONE).format('YYYY-MM-DD hh:mm:ss A') : null
     }));
 
     res.json({ logs: formattedLogs });
@@ -217,6 +225,12 @@ const generateDeliveryExcelReportController = async (req, res) => {
     
     // Agregar datos
     formattedDeliverys.forEach(delivery => {
+      const arrivalTime = delivery.arrival_datetime || delivery.last_arrival_datetime;
+      let arrivalTimeFormatted = '-';
+      if (arrivalTime) {
+        arrivalTimeFormatted = moment.tz(arrivalTime, VENEZUELA_TIMEZONE).format('YYYY-MM-DD hh:mm:ss A');
+      }
+      
       worksheet.addRow({
         nombre: delivery.name || '-',
         empresa: delivery.company || '-',
@@ -224,7 +238,7 @@ const generateDeliveryExcelReportController = async (req, res) => {
         propietario: delivery.owner_name || delivery.owner_nicename || '-',
         email: delivery.owner_email || '-',
         estado: delivery.status_text || 'Anunciado',
-        hora_llegada: delivery.arrival_datetime || '-',
+        hora_llegada: arrivalTimeFormatted,
         total_llegadas: delivery.arrival_count || 0
       });
     });
