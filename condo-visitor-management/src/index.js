@@ -13,7 +13,7 @@ app.use(express.json());
 
 // Rutas de la API
 app.use('/visit', visitorRoutes);
-app.use('/delivery', deliveryRoutes);
+app.use('/visit/delivery', deliveryRoutes);
 
 // Documentación Swagger (montada en la raíz)
 app.use('/visit/api-docs', swagger.serve, swagger.setup);

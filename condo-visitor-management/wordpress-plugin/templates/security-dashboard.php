@@ -783,7 +783,7 @@ jQuery(document).ready(function($) {
     resultsContainer.html('<p style="text-align: center; color: #7f8c8d;">Buscando...</p>');
     
     $.ajax({
-      url: 'https://api.bonaventurecclub.com/delivery/search',
+      url: 'https://api.bonaventurecclub.com/visit/delivery/search',
       method: 'GET',
       data: { search: searchTerm },
       success: function(response) {

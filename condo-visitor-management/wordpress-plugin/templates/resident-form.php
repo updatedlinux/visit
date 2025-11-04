@@ -151,6 +151,43 @@ jQuery(document).ready(function($) {
     // Establecer fecha por defecto a hoy
     document.getElementById('unique_visit_date').valueAsDate = new Date();
     
+    // Alternar formulario de tipo de visita (manejo local para asegurar que funcione)
+    $('.condo-visitor-toggle').on('click', function() {
+        const type = $(this).data('type');
+        
+        // Actualizar botón activo
+        $('.condo-visitor-toggle').removeClass('active');
+        $(this).addClass('active');
+        
+        // Mostrar/ocultar formularios
+        if (type === 'unique') {
+            $('#unique-visit-form').show();
+            $('#frequent-visit-form').hide();
+            $('#delivery-form').hide();
+        } else if (type === 'frequent') {
+            $('#unique-visit-form').hide();
+            $('#frequent-visit-form').show();
+            $('#delivery-form').hide();
+        } else if (type === 'delivery') {
+            $('#unique-visit-form').hide();
+            $('#frequent-visit-form').hide();
+            $('#delivery-form').show();
+            
+            // Establecer fecha actual y nombre del propietario cuando se muestra el formulario
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            const formattedDateDisplay = today.toLocaleDateString('es-VE', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+            });
+            
+            $('#delivery_date').val(formattedDate);
+            $('#delivery_date_display').val(formattedDateDisplay);
+            $('#delivery_owner').val($('#current-wp-user-name').val());
+        }
+    });
+    
     // Función para cargar visitantes frecuentes del usuario
     function loadFrequentVisitors() {
         const wpUserId = $('#current-wp-user-id').val();
@@ -220,6 +257,62 @@ jQuery(document).ready(function($) {
     // Recargar visitantes frecuentes después de registrar uno nuevo
     $(document).on('visitor-registered', function() {
         loadFrequentVisitors();
+    });
+    
+    // Manejar envío de formulario de delivery (manejo local)
+    $('#delivery-registration-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = $(this);
+        const submitBtn = form.find('button[type="submit"]');
+        const originalBtnText = submitBtn.text();
+        
+        // Deshabilitar botón de envío y mostrar carga
+        submitBtn.prop('disabled', true).text('Registrando...');
+        
+        // Obtener datos del formulario
+        const formData = {
+            wp_user_id: $('#current-wp-user-id').val(),
+            name: form.find('input[name="name"]').val(),
+            company: form.find('input[name="company"]').val(),
+            delivery_date: form.find('input[name="delivery_date"]').val()
+        };
+        
+        // Enviar solicitud AJAX
+        $.ajax({
+            url: 'https://api.bonaventurecclub.com/visit/delivery/new',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+                showMessage('Delivery registrado exitosamente', 'success');
+                // Limpiar campos manualmente
+                form.find('input[type="text"]').not('#delivery_date_display').not('#delivery_owner').val('');
+                // Restablecer fecha actual
+                const today = new Date();
+                const formattedDate = today.toISOString().split('T')[0];
+                const formattedDateDisplay = today.toLocaleDateString('es-VE', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit' 
+                });
+                $('#delivery_date').val(formattedDate);
+                $('#delivery_date_display').val(formattedDateDisplay);
+            },
+            error: function(xhr) {
+                let errorMessage = 'Error al registrar el delivery';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                showMessage(errorMessage, 'error');
+            },
+            complete: function() {
+                // Rehabilitar botón de envío
+                setTimeout(function() {
+                    submitBtn.prop('disabled', false).text(originalBtnText);
+                }, 100);
+            }
+        });
     });
 });
 </script>

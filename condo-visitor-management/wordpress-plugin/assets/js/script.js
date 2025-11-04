@@ -183,7 +183,7 @@ jQuery(document).ready(function($) {
         
         // Enviar solicitud AJAX
         $.ajax({
-            url: 'https://api.bonaventurecclub.com/delivery/new',
+            url: 'https://api.bonaventurecclub.com/visit/delivery/new',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(formData),
