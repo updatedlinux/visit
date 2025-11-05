@@ -236,6 +236,15 @@
 
 /* Estilos responsivos */
 @media (max-width: 768px) {
+  .condo-visitor-buttons-container {
+    flex-direction: column;
+  }
+  
+  .condo-visitor-buttons-container .condo-visitor-btn {
+    width: 100%;
+    min-width: 100%;
+  }
+  
   .condo-visitor-container {
     padding: 10px;
   }
@@ -468,6 +477,19 @@
 .condo-visitor-btn-secondary:hover {
   background-color: #545b62;
   border-color: #545b62;
+}
+
+/* Contenedor de botones responsive */
+.condo-visitor-buttons-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.condo-visitor-buttons-container .condo-visitor-btn {
+  flex: 1 1 auto;
+  min-width: 200px;
+  margin: 0 !important;
 }
 
 /* Estilos para modal */

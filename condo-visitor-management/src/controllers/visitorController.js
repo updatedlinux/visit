@@ -299,17 +299,29 @@ async function getFrequentVisitorsByUserController(req, res) {
 async function getUsersController(req, res) {
   try {
     const db = require('../config/database');
-    const query = `
-      SELECT u.ID, u.display_name, u.user_email 
+    const { search } = req.query;
+    
+    let query = `
+      SELECT u.ID, u.display_name, u.user_email, u.user_nicename
       FROM wp_users u
       INNER JOIN wp_usermeta um ON u.ID = um.user_id
       WHERE u.user_status = 0 
         AND um.meta_key = 'wp_capabilities'
         AND um.meta_value LIKE '%subscriber%'
-      ORDER BY u.display_name ASC
     `;
     
-    const [rows] = await db.execute(query);
+    const params = [];
+    
+    // Si hay un término de búsqueda, agregarlo al WHERE
+    if (search && search.trim() !== '') {
+      const searchPattern = `%${search.trim()}%`;
+      query += ` AND (u.display_name LIKE ? OR u.user_email LIKE ? OR u.user_nicename LIKE ?)`;
+      params.push(searchPattern, searchPattern, searchPattern);
+    }
+    
+    query += ` ORDER BY u.display_name ASC LIMIT 50`;
+    
+    const [rows] = await db.execute(query, params);
     res.status(200).json({ users: rows });
   } catch (error) {
     console.error('Error al obtener usuarios:', error);

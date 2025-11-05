@@ -49,12 +49,17 @@
     
     <!-- Botones para gestión de visitas y deliverys -->
     <div class="condo-visitor-section">
-        <button class="condo-visitor-btn condo-visitor-btn-primary" id="open-create-visit-modal">
-            <i class="dashicons dashicons-plus-alt"></i> Crear Anuncio de Visita Única
-        </button>
-        <button class="condo-visitor-btn condo-visitor-btn-primary" id="open-delivery-management-modal" style="margin-left: 10px;">
-            <i class="dashicons dashicons-cart"></i> Gestión de Deliverys
-        </button>
+        <div class="condo-visitor-buttons-container">
+            <button class="condo-visitor-btn condo-visitor-btn-primary" id="open-create-visit-modal">
+                <i class="dashicons dashicons-plus-alt"></i> Crear Anuncio de Visita Única
+            </button>
+            <button class="condo-visitor-btn condo-visitor-btn-primary" id="open-create-delivery-modal">
+                <i class="dashicons dashicons-megaphone"></i> Creación de Anuncio de Delivery
+            </button>
+            <button class="condo-visitor-btn condo-visitor-btn-primary" id="open-delivery-management-modal">
+                <i class="dashicons dashicons-cart"></i> Gestión de Deliverys
+            </button>
+        </div>
     </div>
     
     <!-- Visitantes de Hoy -->
@@ -235,6 +240,51 @@
                     <button type="submit" class="condo-visitor-btn condo-visitor-btn-primary">
                         Crear Anuncio de Visita
                     </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Creación de Anuncio de Delivery -->
+<div id="create-delivery-modal" class="condo-visitor-modal">
+    <div class="condo-visitor-modal-content">
+        <div class="condo-visitor-modal-header">
+            <h3>Creación de Anuncio de Delivery</h3>
+            <button class="condo-visitor-modal-close" id="close-create-delivery-modal">&times;</button>
+        </div>
+        
+        <div class="condo-visitor-modal-body">
+            <form id="create-delivery-form">
+                <div class="condo-visitor-form-group">
+                    <label for="modal_delivery_name">Nombre y/o Apellido</label>
+                    <input type="text" id="modal_delivery_name" name="name" placeholder="Ej: Juan Pérez o Delivery Express" required>
+                </div>
+                
+                <div class="condo-visitor-form-group">
+                    <label for="modal_delivery_date_display">Fecha de Llegada del Delivery</label>
+                    <input type="text" id="modal_delivery_date_display" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                    <input type="hidden" id="modal_delivery_date" name="delivery_date">
+                </div>
+                
+                <div class="condo-visitor-form-group">
+                    <label for="modal_delivery_company">Empresa</label>
+                    <input type="text" id="modal_delivery_company" name="company" placeholder="Ej: PedidosYa, Rappi, Delivery Express" required>
+                </div>
+                
+                <div class="condo-visitor-form-group">
+                    <label for="modal_delivery_owner_search">Propietario Solicitante</label>
+                    <div class="condo-visitor-autocomplete-container">
+                        <input type="text" id="modal_delivery_owner_search" placeholder="Busque por nombre o correo del propietario..." autocomplete="off" required>
+                        <input type="hidden" id="modal_delivery_owner_id" name="wp_user_id">
+                        <div id="modal-delivery-owner-suggestions" class="condo-visitor-suggestions"></div>
+                    </div>
+                    <small style="color: #666; font-size: 12px;">Escriba para buscar y seleccionar el propietario</small>
+                </div>
+                
+                <div class="condo-visitor-modal-footer">
+                    <button type="button" class="condo-visitor-btn condo-visitor-btn-secondary" id="cancel-create-delivery">Cancelar</button>
+                    <button type="submit" class="condo-visitor-btn condo-visitor-btn-primary">Registrar Delivery</button>
                 </div>
             </form>
         </div>
@@ -866,6 +916,146 @@ jQuery(document).ready(function($) {
     visitHistoryPage++;
     var selectedDate = $('#history-date-filter').val();
     loadVisitHistory(selectedDate);
+  });
+  
+  // Manejadores de eventos para modal de Creación de Anuncio de Delivery
+  $('#open-create-delivery-modal').click(function(e) {
+    e.preventDefault();
+    $('#create-delivery-modal').addClass('show');
+    
+    // Establecer fecha actual
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    const formattedDateDisplay = today.toLocaleDateString('es-VE', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    });
+    $('#modal_delivery_date').val(formattedDate);
+    $('#modal_delivery_date_display').val(formattedDateDisplay);
+    
+    // Limpiar campos
+    $('#modal_delivery_name').val('');
+    $('#modal_delivery_company').val('');
+    $('#modal_delivery_owner_search').val('');
+    $('#modal_delivery_owner_id').val('');
+    $('#modal-delivery-owner-suggestions').empty();
+  });
+  
+  $('#close-create-delivery-modal, #cancel-create-delivery').click(function() {
+    $('#create-delivery-modal').removeClass('show');
+    $('#create-delivery-form')[0].reset();
+    $('#modal-delivery-owner-suggestions').empty();
+  });
+  
+  // Búsqueda de propietarios para el modal de creación de delivery
+  let modalDeliveryOwnerSearchTimeout;
+  $('#modal_delivery_owner_search').on('input', function() {
+    const query = $(this).val().trim();
+    const suggestionsContainer = $('#modal-delivery-owner-suggestions');
+    
+    clearTimeout(modalDeliveryOwnerSearchTimeout);
+    
+    if (query.length < 2) {
+      suggestionsContainer.empty();
+      $('#modal_delivery_owner_id').val('');
+      return;
+    }
+    
+    modalDeliveryOwnerSearchTimeout = setTimeout(function() {
+      $.ajax({
+        url: 'https://api.bonaventurecclub.com/visit/users?search=' + encodeURIComponent(query),
+        method: 'GET',
+        success: function(response) {
+          suggestionsContainer.empty();
+          
+          if (response.users && response.users.length > 0) {
+            response.users.forEach(function(user) {
+              const suggestionItem = $('<div class="condo-visitor-suggestion-item">');
+              suggestionItem.text(user.display_name + ' (' + user.user_email + ')');
+              suggestionItem.data('user', user);
+              suggestionItem.click(function() {
+                $('#modal_delivery_owner_search').val(user.display_name);
+                $('#modal_delivery_owner_id').val(user.ID);
+                suggestionsContainer.empty();
+              });
+              suggestionsContainer.append(suggestionItem);
+            });
+            suggestionsContainer.show();
+          } else {
+            suggestionsContainer.empty();
+          }
+        },
+        error: function() {
+          suggestionsContainer.empty();
+        }
+      });
+    }, 300);
+  });
+  
+  // Cerrar sugerencias del modal de delivery al hacer clic fuera
+  $(document).on('click', function(e) {
+    if (!$(e.target).closest('.condo-visitor-autocomplete-container').length && 
+        !$(e.target).is('#modal_delivery_owner_search')) {
+      $('#modal-delivery-owner-suggestions').empty();
+    }
+  });
+  
+  // Manejar envío del formulario de creación de delivery
+  $('#create-delivery-form').on('submit', function(e) {
+    e.preventDefault();
+    
+    const form = $(this);
+    const submitBtn = form.find('button[type="submit"]');
+    const originalBtnText = submitBtn.text();
+    
+    // Validar que se haya seleccionado un propietario
+    const wpUserId = $('#modal_delivery_owner_id').val();
+    if (!wpUserId) {
+      showMessage('Debe seleccionar un propietario válido de la lista', 'error');
+      return;
+    }
+    
+    submitBtn.prop('disabled', true).text('Registrando...');
+    
+    const formData = {
+      wp_user_id: wpUserId,
+      name: $('#modal_delivery_name').val(),
+      company: $('#modal_delivery_company').val(),
+      delivery_date: $('#modal_delivery_date').val()
+    };
+    
+    $.ajax({
+      url: 'https://api.bonaventurecclub.com/visit/delivery/new',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(formData),
+      success: function(response) {
+        submitBtn.prop('disabled', false).text(originalBtnText);
+        showMessage('Delivery registrado exitosamente', 'success');
+        $('#create-delivery-modal').removeClass('show');
+        form[0].reset();
+        $('#modal-delivery-owner-suggestions').empty();
+        // Restablecer fecha actual
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0];
+        const formattedDateDisplay = today.toLocaleDateString('es-VE', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit' 
+        });
+        $('#modal_delivery_date').val(formattedDate);
+        $('#modal_delivery_date_display').val(formattedDateDisplay);
+      },
+      error: function(xhr) {
+        submitBtn.prop('disabled', false).text(originalBtnText);
+        let errorMessage = 'Error al registrar el delivery';
+        if (xhr.responseJSON && xhr.responseJSON.error) {
+          errorMessage = xhr.responseJSON.error;
+        }
+        showMessage(errorMessage, 'error');
+      }
+    });
   });
   
   // Manejadores de eventos para modal de Gestión de Deliverys
