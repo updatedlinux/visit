@@ -51,25 +51,34 @@ function getDeliverysByUser(wp_user_id) {
   return db.execute(query, [wp_user_id]).then(([rows]) => rows);
 }
 
-// Buscar deliverys por nombre o email del propietario
+// Buscar deliverys por nombre o email del propietario (solo del día actual)
 function searchDeliverysByOwner(searchTerm) {
   const searchPattern = `%${searchTerm}%`;
+  
+  // Obtener fecha de hoy en Venezuela
+  const today = moment.tz(VENEZUELA_TIMEZONE).format('YYYY-MM-DD');
+  const startOfDay = moment.tz(today, VENEZUELA_TIMEZONE).startOf('day').toDate();
+  const endOfDay = moment.tz(today, VENEZUELA_TIMEZONE).endOf('day').toDate();
+  
   const query = `
     SELECT 
       d.*, 
       u.display_name as owner_name,
       u.user_email as owner_email,
       u.user_nicename as owner_nicename,
-      (SELECT COUNT(*) FROM condo360_delivery_logs dl WHERE dl.delivery_id = d.id) as arrival_count
+      (SELECT COUNT(*) FROM condo360_delivery_logs dl 
+       WHERE dl.delivery_id = d.id 
+       AND dl.arrival_datetime >= ? AND dl.arrival_datetime <= ?) as arrival_count
     FROM condo360_deliverys d
     JOIN wp_users u ON d.wp_user_id = u.ID
     WHERE 
-      u.display_name LIKE ? OR
-      u.user_email LIKE ? OR
-      u.user_nicename LIKE ?
+      (u.display_name LIKE ? OR
+       u.user_email LIKE ? OR
+       u.user_nicename LIKE ?)
+      AND d.delivery_date = ?
     ORDER BY d.created_at DESC
   `;
-  return db.execute(query, [searchPattern, searchPattern, searchPattern]).then(([rows]) => rows);
+  return db.execute(query, [startOfDay, endOfDay, searchPattern, searchPattern, searchPattern, today]).then(([rows]) => rows);
 }
 
 // Registrar llegada de un delivery

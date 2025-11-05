@@ -253,6 +253,9 @@
             <p class="condo-visitor-description">
                 Busque deliverys por nombre o correo del propietario.
             </p>
+            <p style="font-size: 13px; color: #666; margin-top: -10px; margin-bottom: 15px; font-style: italic;">
+                <strong>Nota:</strong> Solo se muestran los deliverys del día actual. Use el "Historial de Deliverys" para ver deliverys anteriores.
+            </p>
             
             <div class="condo-visitor-form-group">
                 <label for="delivery-search-input">Buscar por Propietario:</label>
@@ -979,7 +982,7 @@ jQuery(document).ready(function($) {
           html += '</tbody></table></div>';
           resultsContainer.html(html);
         } else {
-          resultsContainer.html('<p class="condo-visitor-no-data">No se encontraron deliverys para este propietario.</p>');
+          resultsContainer.html('<p class="condo-visitor-no-data">No se encontraron deliverys para este propietario en el día actual.</p>');
         }
       },
       error: function(xhr) {
