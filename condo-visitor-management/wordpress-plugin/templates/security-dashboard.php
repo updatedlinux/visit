@@ -255,6 +255,12 @@
         </div>
         
         <div class="condo-visitor-modal-body">
+            <div style="background-color: #e3f2fd; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <p style="margin: 0; color: #1976D2; font-size: 14px; line-height: 1.5;">
+                    <strong>📞 Uso de esta opción:</strong> Use esta opción cuando un propietario llame por teléfono para anunciar un delivery. Complete los datos del delivery (nombre, empresa) y seleccione el propietario que está solicitando el delivery.
+                </p>
+            </div>
+            
             <form id="create-delivery-form">
                 <div class="condo-visitor-form-group">
                     <label for="modal_delivery_name">Nombre y/o Apellido</label>
