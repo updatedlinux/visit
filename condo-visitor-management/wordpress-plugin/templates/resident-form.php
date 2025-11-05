@@ -148,6 +148,39 @@
 
 <script>
 jQuery(document).ready(function($) {
+    // Función para mostrar mensajes de éxito/error
+    function showMessage(message, type) {
+        // Remover mensajes anteriores
+        $('.condo-visitor-message').remove();
+        
+        const alertClass = type === 'success' 
+            ? 'condo-visitor-message-success' 
+            : 'condo-visitor-message-error';
+        
+        const messageDiv = $('<div class="condo-visitor-message ' + alertClass + '">' + message + '</div>');
+        
+        // Insertar mensaje justo después del título del formulario de delivery
+        const deliveryForm = $('#delivery-form');
+        if (deliveryForm.length) {
+            deliveryForm.find('h3').after(messageDiv);
+        } else {
+            // Si no está visible, insertarlo al inicio del contenedor
+            $('.condo-visitor-container').prepend(messageDiv);
+        }
+        
+        // Hacer scroll al mensaje para que sea visible
+        $('html, body').animate({
+            scrollTop: messageDiv.offset().top - 100
+        }, 300);
+        
+        // Auto-ocultar después de 5 segundos con animación
+        setTimeout(function() {
+            messageDiv.fadeOut(500, function() {
+                $(this).remove();
+            });
+        }, 5000);
+    }
+    
     // Establecer fecha por defecto a hoy
     var uniqueDateField = document.getElementById('unique_visit_date');
     if (uniqueDateField) {
@@ -311,25 +344,24 @@ jQuery(document).ready(function($) {
                 // Rehabilitar botón inmediatamente
                 submitBtn.prop('disabled', false).text(originalBtnText);
                 
-                // Mostrar mensaje de éxito
-                if (typeof showMessage === 'function') {
-                    showMessage('Delivery registrado exitosamente', 'success');
-                } else {
-                    alert('Delivery registrado exitosamente');
-                }
+                // Mostrar mensaje de éxito primero (antes de limpiar el formulario)
+                showMessage('✓ Delivery registrado exitosamente', 'success');
                 
-                // Limpiar campos manualmente
-                form.find('input[type="text"]').not('#delivery_date_display').not('#delivery_owner').val('');
-                // Restablecer fecha actual
-                const today = new Date();
-                const formattedDate = today.toISOString().split('T')[0];
-                const formattedDateDisplay = today.toLocaleDateString('es-VE', { 
-                    year: 'numeric', 
-                    month: '2-digit', 
-                    day: '2-digit' 
-                });
-                $('#delivery_date').val(formattedDate);
-                $('#delivery_date_display').val(formattedDateDisplay);
+                // Esperar un momento antes de limpiar para que el usuario vea el mensaje
+                setTimeout(function() {
+                    // Limpiar campos manualmente
+                    form.find('input[type="text"]').not('#delivery_date_display').not('#delivery_owner').val('');
+                    // Restablecer fecha actual
+                    const today = new Date();
+                    const formattedDate = today.toISOString().split('T')[0];
+                    const formattedDateDisplay = today.toLocaleDateString('es-VE', { 
+                        year: 'numeric', 
+                        month: '2-digit', 
+                        day: '2-digit' 
+                    });
+                    $('#delivery_date').val(formattedDate);
+                    $('#delivery_date_display').val(formattedDateDisplay);
+                }, 500);
             },
             error: function(xhr) {
                 // Rehabilitar botón en caso de error
@@ -340,11 +372,7 @@ jQuery(document).ready(function($) {
                     errorMessage = xhr.responseJSON.error;
                 }
                 
-                if (typeof showMessage === 'function') {
-                    showMessage(errorMessage, 'error');
-                } else {
-                    alert(errorMessage);
-                }
+                showMessage('✗ ' + errorMessage, 'error');
             }
         });
         
