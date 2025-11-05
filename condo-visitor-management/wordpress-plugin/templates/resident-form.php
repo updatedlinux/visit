@@ -274,8 +274,10 @@ jQuery(document).ready(function($) {
     });
     
     // Manejar envío de formulario de delivery (manejo local)
-    $('#delivery-registration-form').on('submit', function(e) {
+    // Remover cualquier handler previo para evitar duplicación
+    $('#delivery-registration-form').off('submit').on('submit', function(e) {
         e.preventDefault();
+        e.stopImmediatePropagation(); // Prevenir que otros handlers se ejecuten
         
         const form = $(this);
         const submitBtn = form.find('button[type="submit"]');
@@ -291,6 +293,13 @@ jQuery(document).ready(function($) {
             company: form.find('input[name="company"]').val(),
             delivery_date: form.find('input[name="delivery_date"]').val()
         };
+        
+        // Validar que no se envíe vacío
+        if (!formData.name || !formData.company || !formData.delivery_date) {
+            submitBtn.prop('disabled', false).text(originalBtnText);
+            alert('Por favor complete todos los campos requeridos');
+            return;
+        }
         
         // Enviar solicitud AJAX
         $.ajax({
@@ -338,6 +347,9 @@ jQuery(document).ready(function($) {
                 }
             }
         });
+        
+        // Retornar false para asegurar que no se ejecute el submit normal
+        return false;
     });
 });
 </script>

@@ -169,60 +169,10 @@ jQuery(document).ready(function($) {
     });
     
     // Manejar envío de formulario de delivery
-    $('#delivery-registration-form').on('submit', function(e) {
-        e.preventDefault();
-        
-        const form = $(this);
-        const submitBtn = form.find('button[type="submit"]');
-        const originalBtnText = submitBtn.text();
-        
-        // Deshabilitar botón de envío y mostrar carga
-        submitBtn.prop('disabled', true).text('Registrando...');
-        
-        // Obtener datos del formulario
-        const formData = {
-            wp_user_id: $('#current-wp-user-id').val(),
-            name: form.find('input[name="name"]').val(),
-            company: form.find('input[name="company"]').val(),
-            delivery_date: form.find('input[name="delivery_date"]').val()
-        };
-        
-        // Enviar solicitud AJAX
-        $.ajax({
-            url: 'https://api.bonaventurecclub.com/visit/delivery/new',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(formData),
-            success: function(response) {
-                showMessage('Delivery registrado exitosamente', 'success');
-                // Limpiar campos manualmente
-                form.find('input[type="text"]').not('#delivery_date_display').not('#delivery_owner').val('');
-                // Restablecer fecha actual
-                const today = new Date();
-                const formattedDate = today.toISOString().split('T')[0];
-                const formattedDateDisplay = today.toLocaleDateString('es-VE', { 
-                    year: 'numeric', 
-                    month: '2-digit', 
-                    day: '2-digit' 
-                });
-                $('#delivery_date').val(formattedDate);
-                $('#delivery_date_display').val(formattedDateDisplay);
-            },
-            error: function(xhr) {
-                let errorMessage = 'Error al registrar el delivery';
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    errorMessage = xhr.responseJSON.error;
-                }
-                showMessage(errorMessage, 'error');
-            },
-            complete: function() {
-                // Rehabilitar botón de envío - usar setTimeout para asegurar que se ejecute
-                setTimeout(function() {
-                    submitBtn.prop('disabled', false).text(originalBtnText);
-                }, 100);
-            }
-        });
-    });
+    // NOTA: Este handler está deshabilitado porque el template resident-form.php
+    // maneja el formulario de delivery directamente para evitar duplicación
+    // Si necesitas mantener este handler, asegúrate de que no se ejecute dos veces
+    // usando off('submit') antes de on('submit') o verificando si ya existe un handler
     
     // Manejar búsqueda de validación de visitante
     $('#visitor-validation-form').on('submit', function(e) {
