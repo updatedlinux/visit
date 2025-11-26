@@ -521,6 +521,11 @@
   animation: modalSlideIn 0.3s ease-out;
 }
 
+/* Modal de Gestión de Deliverys - más ancho */
+#delivery-management-modal .condo-visitor-modal-content {
+  max-width: 900px;
+}
+
 @keyframes modalSlideIn {
   from {
     opacity: 0;

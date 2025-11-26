@@ -924,15 +924,32 @@ jQuery(document).ready(function($) {
     loadVisitHistory(selectedDate);
   });
   
+  // Función para obtener la fecha local de Venezuela (GMT-4)
+  function getVenezuelaDate() {
+    const now = new Date();
+    // getTimezoneOffset() devuelve minutos con signo invertido
+    // Para UTC-4 (Venezuela), devuelve 240 (no -240)
+    // Venezuela está en UTC-4, así que su offset en minutos es 240
+    const venezuelaOffsetMinutes = 4 * 60; // 240 minutos (UTC-4)
+    const localOffsetMinutes = now.getTimezoneOffset(); // Offset local (ya con signo invertido)
+    const offsetDiffMinutes = venezuelaOffsetMinutes - localOffsetMinutes;
+    const venezuelaTime = new Date(now.getTime() + offsetDiffMinutes * 60 * 1000);
+    
+    // Usar métodos locales (no UTC) para obtener la fecha de Venezuela
+    const year = venezuelaTime.getFullYear();
+    const month = String(venezuelaTime.getMonth() + 1).padStart(2, '0');
+    const day = String(venezuelaTime.getDate()).padStart(2, '0');
+    return year + '-' + month + '-' + day;
+  }
+  
   // Manejadores de eventos para modal de Creación de Anuncio de Delivery
   $('#open-create-delivery-modal').click(function(e) {
     e.preventDefault();
     $('#create-delivery-modal').addClass('show');
     
-    // Establecer fecha actual
-    const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
-    const formattedDateDisplay = today.toLocaleDateString('es-VE', { 
+    // Establecer fecha actual usando función helper
+    const formattedDate = getVenezuelaDate();
+    const formattedDateDisplay = new Date().toLocaleDateString('es-VE', { 
       year: 'numeric', 
       month: '2-digit', 
       day: '2-digit' 
@@ -1042,10 +1059,9 @@ jQuery(document).ready(function($) {
         $('#create-delivery-modal').removeClass('show');
         form[0].reset();
         $('#modal-delivery-owner-suggestions').empty();
-        // Restablecer fecha actual
-        const today = new Date();
-        const formattedDate = today.toISOString().split('T')[0];
-        const formattedDateDisplay = today.toLocaleDateString('es-VE', { 
+        // Restablecer fecha actual usando función helper
+        const formattedDate = getVenezuelaDate();
+        const formattedDateDisplay = new Date().toLocaleDateString('es-VE', { 
           year: 'numeric', 
           month: '2-digit', 
           day: '2-digit' 
